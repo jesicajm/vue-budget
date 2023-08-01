@@ -101,7 +101,7 @@ import BaseFormCategory from "./UI/BaseFormCategory.vue";
 import BaseCard from "./UI/BaseCard.vue";
 
 export default {
-  emits:['hide-allocated-form'],
+  emits:['hide-allocated-form','new-value-assigned'],
   props: ["accountGroup", "idBudget", 'totalMoneyAvailable'],
   components: {
     BaseFormCategory,
@@ -165,6 +165,9 @@ export default {
           updateAssignedCategory: this.moneyAllocatedCategory 
        });
        console.log(this.valueMoneyAllocate);
+
+       this.$emit('new-value-assigned', this.valueMoneyAllocate);
+
        this.$emit('hide-allocated-form');
     }
   },
@@ -173,7 +176,7 @@ export default {
 
 <style scoped>
 .allocated-form {
-  width: 288px;
+  width: 300px;
 }
 
 .header {

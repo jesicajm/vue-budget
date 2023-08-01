@@ -1,7 +1,11 @@
 <template>
   <section class="menu">
     <new-budget v-if="isVisibleNewBudget" @close-new-budget="closeNewBudget" ></new-budget>
-    <add-account v-if="isVisibleAddAccount" @close-add-account="closeAddAccount" :budget-id="budgetId"></add-account>
+    <add-account 
+        v-if="isVisibleAddAccount" 
+        :budget-id="budgetId"  
+        @close-add-account="closeAddAccount" 
+        @add-account-available="$emit('add-account-available', $event)"></add-account>
     <div>
         <button @click="toggleMenu" class="menu-item">{{ budgetId }}
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
@@ -120,7 +124,7 @@ import ItemBudgetAccount from '../../components/ItemBudgetAccount.vue';
 import GroupAccounts from '../../components/GroupAccounts.vue'
 
 export default {
-    emits:['budget-name'],
+    emits:['budget-name', 'add-account-available'],
     props:['budgetId', 'userAccounts'],
     components:{
        NewBudget,

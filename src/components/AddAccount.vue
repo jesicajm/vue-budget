@@ -56,7 +56,7 @@
 
 export default {
     props:['budgetId'],
-    emits: ['close-add-account'],
+    emits: ['close-add-account', 'add-account-available'],
     data(){
         return {
             viewType: 'addAccount',
@@ -117,6 +117,10 @@ export default {
                 accountType: this.accountType
               }
             );
+
+            if(this.accountType === 'Ahorros' || this.accountType === 'Cuenta corriente' || this.accountType ==='Efectivo'){
+                this.$emit('add-account-available', this.accountBalance);
+            }
 
             this.$emit('close-add-account');   
         },

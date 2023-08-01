@@ -5,6 +5,7 @@
       class="menu"
       :budget-id="idBudget"
       :user-accounts="budgetAccounts"
+      @add-account-available="addAccountAvailable"
     ></menu-account>
     <div class="budget-target" v-if="!isLoading">
       <div class="budget-target__header">
@@ -13,6 +14,7 @@
           class="budget-header__item"
           :account-group="accountGroup"
           :id-budget="idBudget"
+          :balance-new-account="balanceNewAccount"
         ></available-money>
       </div>
       <div class="budget-target__body">
@@ -97,6 +99,7 @@ export default {
       isVisibleAddAccount: false,
       categoryTarget: null,
       idBudget: null,
+      balanceNewAccount: null
       // budgetName: null,
       // userBudget: null,
       //userAccounts: null
@@ -171,6 +174,9 @@ export default {
       await this.$store.dispatch("user/loadUser", this.idBudget);
 
       this.isLoading = false;
+    },
+    addAccountAvailable(balanceAccount){
+       this.balanceNewAccount = balanceAccount;
     },
     updateCategoryDelete() {
       console.log("from BUDGET emit updateCategoryDelete");
