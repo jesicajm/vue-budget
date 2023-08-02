@@ -27,6 +27,7 @@
       <assigned-fix-form
         class="available-money__fix-form"
         v-if="isVisibleFixForm"
+        :account-group="accountGroup"
       ></assigned-fix-form>
       <allocated-form
         class="available-money__allocated-form"
@@ -54,7 +55,7 @@ export default {
       isVisibleFormAllocate: false,
       isVisibleFixForm: false,
       moneyAllocated: 0,
-      creditBalance: 0,
+      creditBalance: 0
     };
   },
   created() {
@@ -110,6 +111,11 @@ export default {
     setTotalMoneyAvailable(moneyAvailable) {
       this.totalAllocatedMoney = moneyAvailable;
     },
+    setCategoryAccount(selectedCategory){
+       this.selectAccount = selectedCategory.account;
+       this.selectCategory = selectedCategory.category;
+       this.moneyAllocatedCategory = selectedCategory.moneyAssigned;
+    },
     addNewValueAssigned(newValueAssigned) {
       this.totalMoneyAvailable -= newValueAssigned;
     },
@@ -134,6 +140,21 @@ export default {
 
       this.$emit("set-total-money-available", this.totalMoneyAvailable);
     },
+    submitMoneyAllocate(){
+       this.moneyAllocatedCategory += Number(this.valueMoneyAllocate);
+       
+       this.$store.dispatch("budget/setMoneyAssigned", {
+          idBudget:this.idBudget,
+          nameCategory: this.selectCategory,
+          nameAccount: this.selectAccount,
+          updateAssignedCategory: this.moneyAllocatedCategory 
+       });
+       console.log(this.valueMoneyAllocate);
+
+       this.$emit('new-value-assigned', this.valueMoneyAllocate);
+
+       this.$emit('hide-allocated-form');
+    }
   },
 };
 </script>

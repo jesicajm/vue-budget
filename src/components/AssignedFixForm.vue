@@ -21,58 +21,42 @@
       <button @click="hideAddCategory">Cancelar</button>
       <button>Ok</button>
     </div>
-    <base-card
-      class="section-manually__categories-group"
-      v-if="isVisibleGroupCategories"
-    >
-      <p class="section-manually__categories-group-tittle">
-        Categorias Presupuesto
-      </p>
-      <ul>
-        <li
-          class="account-type"
-          v-for="account in accountGroup"
-          :key="account.type"
-        >
-          {{ account.type }}:
-          <ul>
-            <li
-              class="category"
-              v-for="category in account.categories"
-              :key="category.name"
-              @click="
-                setCategoryAccount(
-                  account.type,
-                  category.name,
-                  category.assigned
-                )
-              "
-            >
-              <span>{{ category.name }}</span>
-              <span>${{ category.assigned }}</span>
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </base-card>
+    <menu-assign-categories
+        class="group-category"
+        v-if="isVisibleGroupCategories"
+        :account-group="accountGroup"
+        @selected-category="setCategoryAccount"
+    ></menu-assign-categories>
   </base-form-category>
 </template>
 
 <script>
 import BaseFormCategory from "./UI/BaseFormCategory.vue";
+import MenuAssignCategories from './MenuAssignCategories.vue';
 
 export default {
   components: {
-    BaseFormCategory,
+    MenuAssignCategories,
+    BaseFormCategory
   },
+  emits:['hide-allocated-form','new-value-assigned','selected-category'],
+  props: ["accountGroup", "idBudget", 'totalMoneyAvailable'],
   data() {
     return {
-        isVisibleGroupCategories: false
-    };
+        isVisibleGroupCategories: false,
+        selectCategory: null,
+        selectAccount: null,
+        moneyAllocatedCategory: 0,
+    }
   },
   methods: {
     showGroupCategories() {
       this.isVisibleGroupCategories = true;
+    },
+    setCategoryAccount(selectedCategory){
+       this.selectAccount = selectedCategory.account;
+       this.selectCategory = selectedCategory.category;
+       this.moneyAllocatedCategory = selectedCategory.moneyAssigned;
     },
   },
 };
@@ -108,5 +92,9 @@ export default {
 .form-fix__actions button {
   padding: 10px;
   margin-right: 12px;
+}
+
+.group-category {
+  margin-top: 77.5px; 
 }
 </style>

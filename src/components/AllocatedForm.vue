@@ -64,58 +64,36 @@
         <button @click="hideAllocatedForm" type="button">Cancelar</button>
         <button @click="submitMoneyAllocate" type="button">Asignar</button>
       </div>
-      <base-card
-        class="section-manually__categories-group"
-        v-if="isVisibleGroupCategories"
-      >
-        <p class="section-manually__categories-group-tittle">
-          Categorias Presupuesto
-        </p>
-        <ul>
-          <li
-            class="account-type"
-            v-for="account in accountGroup"
-            :key="account.type"
-          >
-            {{ account.type }}:
-            <ul>
-              <li
-                class="category"
-                v-for="category in account.categories"
-                :key="category.name"
-                @click="setCategoryAccount(account.type,category.name, category.assigned)"
-              >
-                <span>{{ category.name }}</span>
-                <span>${{ category.assigned }}</span>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </base-card>
+       <menu-assign-categories
+          class="group-category"
+          v-if="isVisibleGroupCategories"
+          :account-group="accountGroup"
+          @selected-category="setCategoryAccount"
+       ></menu-assign-categories>
     </section>
   </base-form-category>
 </template>
 
 <script>
 import BaseFormCategory from "./UI/BaseFormCategory.vue";
-import BaseCard from "./UI/BaseCard.vue";
+import MenuAssignCategories from './MenuAssignCategories.vue';
 
 export default {
-  emits:['hide-allocated-form','new-value-assigned'],
+  emits:['hide-allocated-form','new-value-assigned','selected-category'],
   props: ["accountGroup", "idBudget", 'totalMoneyAvailable'],
   components: {
     BaseFormCategory,
-    BaseCard,
+    MenuAssignCategories
   },
   data() {
     return {
       valueMoneyAllocate: this.totalMoneyAvailable,
-      moneyAllocatedCategory: null,
       isVisibleAuto: true,
       isVisibleManually: false,
       isVisibleGroupCategories: false,
       selectCategory: null,
       selectAccount: null,
+      moneyAllocatedCategory: 0,
       moneyAllocated: 0,
       creditBalance: 0
     };
@@ -126,12 +104,6 @@ export default {
         this.isVisibleGroupCategories = false;
       }
     }
-  },
-  computed:{
-    /*totalMoneyAvailable(){
-       this.$store.getters['user/filterDebitAccounts'].forEach(account => this.creditBalance += account.accountBalance)
-       return this.creditBalance - this.moneyAllocated;
-    },*/
   },
   methods: {
     showSection(section) {
@@ -149,15 +121,15 @@ export default {
     hideAllocatedForm() {
         this.$emit('hide-allocated-form');
     },
-    setCategoryAccount(account,category, moneyAssigned){
-       this.selectAccount = account;
-       this.selectCategory = category;
-       this.moneyAllocatedCategory = moneyAssigned;
+    setCategoryAccount(selectedCategory){
+       this.selectAccount = selectedCategory.account;
+       this.selectCategory = selectedCategory.category;
+       this.moneyAllocatedCategory = selectedCategory.moneyAssigned;
        this.isVisibleGroupCategories = false;
     },
     submitMoneyAllocate(){
        this.moneyAllocatedCategory += Number(this.valueMoneyAllocate);
-       //this.totalAllocatedMoney -= this.valueMoneyAllocate;
+       this.totalAllocatedMoney -= this.valueMoneyAllocate;
        this.$store.dispatch("budget/setMoneyAssigned", {
           idBudget:this.idBudget,
           nameCategory: this.selectCategory,
@@ -176,7 +148,7 @@ export default {
 
 <style scoped>
 .allocated-form {
-  width: 300px;
+  width: 288px;
 }
 
 .header {
@@ -223,45 +195,8 @@ section {
 .section-manually__actions:first-child{
    margin-right: 10px;
 }
-.section-manually__categories-group {
-  position: absolute;
-  z-index: 20;
-  width: 260px;
-  color: gray;
-  padding: 10px;
-  background: white;
-}
 
-.section-manually__categories-group-tittle {
-  margin: 0;
-  border-bottom: 1px solid rgb(161, 152, 152);
-  font-weight: bold;
-}
-
-.section-manually__categories-group {
-   height: 12.5rem;
-   overflow-y:scroll;   
-}
-
-.section-manually__categories-group ul {
-  list-style: none;
-  padding: 0;
-}
-
-.account-type {
-  margin: 0;
-  padding: 5px;
-  font-weight: bold;
-}
-
-.category {
-  display: flex;
-  justify-content: space-between;
-  padding: 2px 8px;
-  font-weight: normal;
-}
-
-.category:hover {
-  background: rgb(204, 198, 198);
+.group-category {
+   margin-top: 150px;
 }
 </style>

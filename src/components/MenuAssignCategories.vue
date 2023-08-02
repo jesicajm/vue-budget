@@ -1,9 +1,8 @@
 <template>
   <base-card
-    class="section-manually__categories-group"
-    v-if="isVisibleGroupCategories"
+    class="categories-group"
   >
-    <p class="section-manually__categories-group-tittle">
+    <p class="categories-group__tittle">
       Categorias Presupuesto
     </p>
     <ul>
@@ -18,9 +17,7 @@
             class="category"
             v-for="category in account.categories"
             :key="category.name"
-            @click="
-              setCategoryAccount(account.type, category.name, category.assigned)
-            "
+            @click="setCategoryAccount(account.type, category.name, category.assigned)"
           >
             <span>{{ category.name }}</span>
             <span>${{ category.assigned }}</span>
@@ -38,37 +35,45 @@ export default {
     components: {
         BaseCard
     },
+    props: ["accountGroup"],
+    emits:['selected-category'],
     data() {
-        return{
-           isVisibleGroupCategories:false
-        }
+      return {
+        
+      }
     },
+    methods:{
+      setCategoryAccount(account,category,moneyAssigned){
+        this.$emit('selected-category', {
+          account: account,
+          category: category,
+          moneyAssigned: moneyAssigned
+        })
+    },
+    }
 }
 </script>
 
 
 <style scoped>
-.section-manually__categories-group {
+.categories-group{
   position: absolute;
   z-index: 20;
   width: 260px;
   color: gray;
   padding: 10px;
   background: white;
+  height: 12.5rem;
+  overflow-y:scroll; 
 }
 
-.section-manually__categories-group-tittle {
+.categories-group__tittle {
   margin: 0;
   border-bottom: 1px solid rgb(161, 152, 152);
   font-weight: bold;
 }
 
-.section-manually__categories-group {
-   height: 12.5rem;
-   overflow-y:scroll;   
-}
-
-.section-manually__categories-group ul {
+.categories-group ul {
   list-style: none;
   padding: 0;
 }
