@@ -2,6 +2,7 @@
   <base-form-category class="form-fix">
     <p>Desasignar la asignación de dinero de</p>
     <div class="form-fix__input">
+      <span>{{ selectAccount }}: {{ selectCategory }}</span>
       <svg
         @click="showGroupCategories"
         xmlns="http://www.w3.org/2000/svg"
@@ -18,8 +19,8 @@
       </svg>
     </div>
     <div class="form-fix__actions">
-      <button @click="hideAddCategory">Cancelar</button>
-      <button>Ok</button>
+      <button type="button" @click="hideAddCategory">Cancelar</button>
+      <button type="button" @click="submitMoneyAllocate">Ok</button>
     </div>
     <menu-assign-categories
         class="group-category"
@@ -46,7 +47,9 @@ export default {
         isVisibleGroupCategories: false,
         selectCategory: null,
         selectAccount: null,
-        moneyAllocatedCategory: 0,
+        moneyAllocated: 0,
+        moneyAvailable:0,
+        valueUnassign: 0
     }
   },
   methods: {
@@ -56,8 +59,50 @@ export default {
     setCategoryAccount(selectedCategory){
        this.selectAccount = selectedCategory.account;
        this.selectCategory = selectedCategory.category;
-       this.moneyAllocatedCategory = selectedCategory.moneyAssigned;
+       this.moneyAllocated = selectedCategory.moneyAssigned;
+       this.moneyAvailable = selectedCategory.moneyAvailable;
+       this.isVisibleGroupCategories = false;
     },
+    submitMoneyAllocate(){
+        console.log(this.totalMoneyAvailable);
+        console.log(this.moneyAvailable);
+        if(this.totalMoneyAvailable <= this.moneyAvailable){
+        
+          const remaining =  this.totalMoneyAvailable + this.moneyAvailable;
+          console.log(remaining)
+
+          if(remaining <= 0){
+             this.moneyAllocated -= this.moneyAvailable;
+             this.valueUnassign = this.moneyAvailable;
+             this.moneyAvailable = 0;
+             console.log(this.moneyAllocated);
+             console.log(this.valueUnassign);
+             console.log(this.moneyAvailable);
+          }else{
+             this.valueUnassign = this.moneyAvailable - remaining;
+             this.moneyAllocated -= this.moneyAvailable - remaining;
+             this.moneyAvailable -= this.moneyAvailable - remaining;
+             
+             console.log(this.moneyAllocated);
+             console.log(this.valueUnassign);
+             console.log(this.moneyAvailable);
+          }
+
+          this.$store.dispatch("budget/setMoneyAssigned", {
+            idBudget: this.idBudget,
+            nameCategory: this.selectCategory,
+            nameAccount: this.selectAccount,
+            updateAssignedCategory: this.moneyAllocated,
+            updateAvailableCategory: this.moneyAvailable,
+          });
+
+          this.$emit('new-value-assigned', this.valueUnassign);
+
+        } 
+
+        this.$emit('hide-allocated-form');
+
+    }
   },
 };
 </script>
@@ -74,10 +119,14 @@ export default {
 
 .form-fix__input {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   border: 2px solid rgb(34, 33, 33);
   padding: 5px 2px;
   cursor: pointer;
+}
+
+.form-fix__input span{
+   color:gray;
 }
 
 .form-fix__input svg {

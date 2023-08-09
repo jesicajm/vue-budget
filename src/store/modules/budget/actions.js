@@ -194,6 +194,7 @@ export default {
         const indexCategory  = budgetAccount[data.nameAccount].findIndex(category => category.name === data.nameCategory)
   
         budgetAccount[data.nameAccount][indexCategory].assigned = data.updateAssignedCategory;
+        budgetAccount[data.nameAccount][indexCategory].available = data.updateAvailableCategory
 
         await setDoc(userBudgetRef, {
             [data.idBudget] : budgetAccount

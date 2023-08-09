@@ -14,6 +14,7 @@ export default {
       let acccount = state.budgets.find(budget => budget.id === payload.idBudget).accountGroup.find(account => account.type === payload.nameAccount);
       let indexCategory = acccount.categories.findIndex(category => category.name === payload.nameCategory);
       acccount.categories[indexCategory].assigned = payload.updateAssignedCategory; 
+      acccount.categories[indexCategory].available = payload.updateAvailableCategory; 
    },
    deleteCategory(state, payload){
       let acccount = state.budgets.find(budget => budget.userId === payload.userId && budget.id === payload.idBudget).accountGroup.find(account => account.type === payload.nameAccount);

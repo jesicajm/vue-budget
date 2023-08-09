@@ -17,7 +17,7 @@
             class="category"
             v-for="category in account.categories"
             :key="category.name"
-            @click="setCategoryAccount(account.type, category.name, category.assigned)"
+            @click="setCategoryAccount(account.type, category.name, category.assigned, category.available)"
           >
             <span>{{ category.name }}</span>
             <span>${{ category.assigned }}</span>
@@ -43,11 +43,12 @@ export default {
       }
     },
     methods:{
-      setCategoryAccount(account,category,moneyAssigned){
+      setCategoryAccount(account,category,moneyAssigned, available){
         this.$emit('selected-category', {
           account: account,
           category: category,
-          moneyAssigned: moneyAssigned
+          moneyAssigned: moneyAssigned,
+          moneyAvailable: available
         })
     },
     }
@@ -94,4 +95,5 @@ export default {
 .category:hover {
   background: rgb(204, 198, 198);
 }
+
 </style>

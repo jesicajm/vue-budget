@@ -27,7 +27,11 @@
       <assigned-fix-form
         class="available-money__fix-form"
         v-if="isVisibleFixForm"
+        :id-budget="idBudget"
         :account-group="accountGroup"
+        :total-money-available="totalMoneyAvailable"
+        @new-value-assigned="addValueUnassigned"
+        @hide-allocated-form="hideFixForm"
       ></assigned-fix-form>
       <allocated-form
         class="available-money__allocated-form"
@@ -35,7 +39,7 @@
         :account-group="accountGroup"
         :id-budget="idBudget"
         :total-money-available="totalMoneyAvailable"
-        @new-value-assigned="addNewValueAssigned"
+        @new-value-assigned="subtractValueAssigned"
         @hide-allocated-form="hideAllocatedForm"
       ></allocated-form>
     </div>
@@ -108,6 +112,9 @@ export default {
     hideAllocatedForm() {
       this.isVisibleFormAllocate = false;
     },
+    hideFixForm(){
+      this.isVisibleFixForm = false;
+    },
     setTotalMoneyAvailable(moneyAvailable) {
       this.totalAllocatedMoney = moneyAvailable;
     },
@@ -116,8 +123,11 @@ export default {
        this.selectCategory = selectedCategory.category;
        this.moneyAllocatedCategory = selectedCategory.moneyAssigned;
     },
-    addNewValueAssigned(newValueAssigned) {
+    subtractValueAssigned(newValueAssigned) {
       this.totalMoneyAvailable -= newValueAssigned;
+    },
+    addValueUnassigned(valueUnassign){
+      this.totalMoneyAvailable += valueUnassign;
     },
     calculateTotalMoneyAllocate() {
       for (const account of this.accountGroup) {
@@ -134,8 +144,7 @@ export default {
 
       console.log(this.creditBalance);
 
-      this.totalMoneyAvailable = this.creditBalance - this.moneyAllocated;
-
+      this.totalMoneyAvailable = this.creditBalance - (this.moneyAllocated);
       console.log(this.totalMoneyAvailable);
 
       this.$emit("set-total-money-available", this.totalMoneyAvailable);
@@ -149,6 +158,7 @@ export default {
           nameAccount: this.selectAccount,
           updateAssignedCategory: this.moneyAllocatedCategory 
        });
+
        console.log(this.valueMoneyAllocate);
 
        this.$emit('new-value-assigned', this.valueMoneyAllocate);

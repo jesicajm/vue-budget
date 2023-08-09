@@ -93,8 +93,8 @@ export default {
       isVisibleGroupCategories: false,
       selectCategory: null,
       selectAccount: null,
-      moneyAllocatedCategory: 0,
       moneyAllocated: 0,
+      moneyAvailable: 0,
       creditBalance: 0
     };
   },
@@ -124,19 +124,23 @@ export default {
     setCategoryAccount(selectedCategory){
        this.selectAccount = selectedCategory.account;
        this.selectCategory = selectedCategory.category;
-       this.moneyAllocatedCategory = selectedCategory.moneyAssigned;
+       this.moneyAllocated = selectedCategory.moneyAssigned;
+       this.moneyAvailable = selectedCategory.moneyAvailable;
        this.isVisibleGroupCategories = false;
     },
     submitMoneyAllocate(){
-       this.moneyAllocatedCategory += Number(this.valueMoneyAllocate);
-       this.totalAllocatedMoney -= this.valueMoneyAllocate;
+       this.valueMoneyAllocate = Number(this.valueMoneyAllocate);
+       this.moneyAllocated += this.valueMoneyAllocate;
+       this.moneyAvailable += this.valueMoneyAllocate;
+       
        this.$store.dispatch("budget/setMoneyAssigned", {
           idBudget:this.idBudget,
           nameCategory: this.selectCategory,
           nameAccount: this.selectAccount,
-          updateAssignedCategory: this.moneyAllocatedCategory 
+          updateAssignedCategory: this.moneyAllocated,
+          updateAvailableCategory: this.moneyAvailable
        });
-       console.log(this.valueMoneyAllocate);
+
 
        this.$emit('new-value-assigned', this.valueMoneyAllocate);
 
@@ -196,7 +200,4 @@ section {
    margin-right: 10px;
 }
 
-.group-category {
-   margin-top: 150px;
-}
 </style>
