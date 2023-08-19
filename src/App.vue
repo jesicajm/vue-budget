@@ -12,7 +12,10 @@ export default {
         return{
           
         }
-    }
+    },
+   /* created(){
+      //  this.$store.dispatch('autoLogin')
+    }*/
 }   
 </script>
 
@@ -28,6 +31,6 @@ body {
 
 main {
    display: flex;
-  
 }
+
 </style>

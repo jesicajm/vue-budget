@@ -12,8 +12,6 @@
 </template>
 
 <script>
-
-
 export default {
     data(){
         return{
@@ -41,42 +39,33 @@ export default {
     },
     methods:{
         async submitForm(){ 
-            this.formIsValid= true
+            this.formIsValid= true;
 
             if(this.email === '' || !this.email.includes('@') || this.password.length < 6){
                 this.formIsValid = false;
                 return;
             }
-             this.isLoading = true;
+            
+            this.isLoading = true;
 
             try{
                 await this.$store.dispatch('login', {
                     email: this.email,
                     password: this.password
-            });
+                })
             }catch(err){
                 this.error = err.message || 'Failded to authenticate, try later';
-                 throw this.error
+                throw this.error
             }
 
             this.$router.replace('/budget');
             
             this.isLoading = false;
 
-        },
-        switchAuthMode(){
-            if(this.mode === 'login'){
-              this.mode = 'signup'
-            }else{
-              this.mode = 'login'
-            }
         }
     }
 }
 </script>
-
-
-
 
 <style scoped>
 .sign-in-form{

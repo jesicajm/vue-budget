@@ -41,6 +41,9 @@ export default {
 
         //console.log(responseData);
  
+      //  localStorage.setItem('token', user.accessToken);
+       // localStorage.setItem('userId', user.uid);
+
         context.commit('setUser', {
            token: user.accessToken,
            userId: user.uid
@@ -85,6 +88,9 @@ export default {
         }
 
         console.log(responseData);*/
+
+       // localStorage.setItem('token', user.accessToken);
+        //localStorage.setItem('userId', user.uid);
  
         context.commit('setUser', {
            token: user.accessToken,
@@ -92,5 +98,16 @@ export default {
            //tokenExpiration: responseData.expiresIn,
         });
 
+    },
+    autoLogin(context){
+       const token = localStorage.getItem('token');
+       const userId = localStorage.getItem('userId');
+
+       if(token && userId){
+           context.commit('setUser', {
+               token: token,
+               userId: userId
+           });
+       }
     }
 }

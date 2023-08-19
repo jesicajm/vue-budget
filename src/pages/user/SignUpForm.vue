@@ -55,7 +55,7 @@ export default {
         name: 'Mi Presupuesto'
       });
       
-      this.$router.replace('/budget');
+      this.$router.replace('/budget/Mi Presupuesto');
 
       this.isLoading = false;
 

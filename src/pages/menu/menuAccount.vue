@@ -58,7 +58,9 @@
                             :key="account.accountName"
                             :account-type="account.accountType"
                             :account-name="account.accountName"
-                            :account-balance="account.accountBalance">
+                            :account-balance="account.accountBalance"
+                            @click="selectAccount(account.accountName)"
+                            :class="{selected: account.accountName === selectedAccount }">
                         </item-budget-account>
                     </ul>
                 </group-accounts>    
@@ -74,7 +76,9 @@
                             :key="account.accountName"
                             :account-type="account.accountType"
                             :account-name="account.accountName"
-                            :account-balance="account.accountBalance"> 
+                            :account-balance="account.accountBalance"
+                            @click="selectAccount(account.accountName)"
+                            :class="{selected: account.accountName === selectedAccount }"> 
                         </item-budget-account>
                     </ul>
                 </group-accounts>
@@ -90,7 +94,9 @@
                             :key="account.accountName"
                             :account-type="account.accountType"
                             :account-name="account.accountName"
-                            :account-balance="account.accountBalance"> 
+                            :account-balance="account.accountBalance"
+                            @click="selectAccount(account.accountName)"
+                            :style="{color: account.accountName === selectedAccount ? 'red' : 'green' }"> 
                         </item-budget-account>
                     </ul>
                 </group-accounts>
@@ -144,7 +150,8 @@ export default {
            isOver: false,
            budgetBalance: 0,
            creditBalance:0,
-           trackingBalance:0
+           trackingBalance:0,
+           selectedAccount: null
         }
     },
     computed:{
@@ -248,6 +255,10 @@ export default {
                     this.budgetTotalBalance -= newAccount;
                 }
             }
+        },
+        selectAccount(accountId){
+            this.selectedAccount = accountId;
+            this.$router.replace(`/budget/${this.budgetId}/${accountId}`);
         }
     }
 }
@@ -271,7 +282,7 @@ export default {
 }
 
 .menu-item__with-accounts{
-  color:white;
+   color:white;
 }
 
 .account-list{
@@ -279,11 +290,16 @@ export default {
     padding:0;
 }
 
-.account-list li {
+/*.ccount-list li {
    display: grid;
-   grid-template-columns: 4fr 2fr;
+   grid-template-columns: 1fr 4fr 2fr;
+   align-items: center;
+   padding: 8px;
    color: white;
-   margin: 12px;
+}*/
+
+.account-list li:hover{
+   background: rgb(41, 41, 73);
 }
 
 .menu-account{
@@ -305,5 +321,9 @@ export default {
 
 .menu-account ul li{
    margin-bottom: 24px;
+}
+
+.selected{
+    background: rgb(58, 58, 148);
 }
 </style>
