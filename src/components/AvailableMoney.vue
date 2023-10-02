@@ -64,6 +64,9 @@ export default {
   },
   created() {
     console.log("from created avalibleMoney");
+    console.log(this.accountGroup)
+    console.log(this.idBudget)
+    console.log(this.balanceNewAccount)
     this.calculateTotalMoneyAllocate();
   },
   watch: {
@@ -129,14 +132,20 @@ export default {
     addValueUnassigned(valueUnassign){
       this.totalMoneyAvailable += valueUnassign;
     },
-    calculateTotalMoneyAllocate() {
-      for (const account of this.accountGroup) {
+    async calculateTotalMoneyAllocate() {
+      console.log(this.moneyAllocated)
+      for(const account of this.accountGroup) {
         account.categories.forEach(
           (category) => (this.moneyAllocated += category.assigned)
         );
       }
 
+      await this.$store.dispatch("user/loadUser", this.idBudget);
+
       console.log(this.moneyAllocated);
+      console.log(this.creditBalance);
+
+      console.log(this.$store.getters["user/filterDebitAccounts"]);
 
       this.$store.getters["user/filterDebitAccounts"].forEach(
         (account) => (this.creditBalance += account.accountBalance)
@@ -148,6 +157,7 @@ export default {
       console.log(this.totalMoneyAvailable);
 
       this.$emit("set-total-money-available", this.totalMoneyAvailable);
+
     },
     submitMoneyAllocate(){
        this.moneyAllocatedCategory += Number(this.valueMoneyAllocate);

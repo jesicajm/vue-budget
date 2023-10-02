@@ -3,6 +3,7 @@
     <div>
       <svg
         v-if="isVisibleEdit"
+        @click="showEditAccount"
         xmlns="http://www.w3.org/2000/svg"
         width="10"
         height="10"
@@ -15,21 +16,22 @@
         />
       </svg>
     </div>
-    <span>{{ accountName }}</span>
+    <div class="item-account__data" @click="selectAccount">
+       <span>{{ accountName }}</span>
     <span
       :class="{
         negativo:
           creditAccounts.includes(accountType) || this.accountType === 'Pasivo',
       }"
-      >{{ negativeBalance }}${{ accountBalance }}</span
-    >
+      >{{ negativeBalance }}${{ accountBalance }}</span>
+    </div>
   </li>
 </template>
 
 <script>
 export default {
   props: ["accountName", "accountBalance", "accountType"],
-  emits: ["select-account"],
+  emits: ["select-account", 'show-edit-account','select-account'],
   data() {
     return {
       creditAccounts: [
@@ -56,18 +58,32 @@ export default {
       }
     },
   },
+  methods:{
+    showEditAccount(){
+      this.$emit('show-edit-account', {
+        accountName: this.accountName, 
+        accountBalance: this.accountBalance});
+    },
+    selectAccount(){
+      this.$emit('select-account');
+    }
+  }
 };
 </script>
 
 <style>
 .item-account {
   display: grid;
-  grid-template-columns: 1fr 4fr 2fr;
+  grid-template-columns: 1fr 6fr;
   align-items: center;
   padding: 8px 0;
   color: white;
 }
 
+.item-account__data {
+   display: grid;
+   grid-template-columns: 4fr 2fr;
+}
 .negativo {
   color: red;
   padding: 1px 5px;

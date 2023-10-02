@@ -21,6 +21,4 @@ export default {
         const debitAccount = ['Cuenta corriente', 'Ahorros', 'Efectivo'];
         return getters.userAccounts.filter(account => debitAccount.includes(account.accountType))
     }
-    
-
 };

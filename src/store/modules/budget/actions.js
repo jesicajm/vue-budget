@@ -1,5 +1,5 @@
 import db from "../../../main";
-import { doc, setDoc, getDoc, updateDoc, deleteField } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, deleteField , Timestamp } from "firebase/firestore";
 
 export default {
     async addBudget(context, data){
@@ -7,6 +7,7 @@ export default {
 
         const budget = {
             id: data.name,
+            date: Timestamp.fromDate(new Date()),
             accountGroup: [{type: 'Frecuente', categories: [{name:'Salidas a comer', assigned: 0, activity:0, available: 0 }, {name:'Transporte', assigned: 0, activity:0, available: 0}, {name:'Comida', assigned: 0, activity:0, available: 0}]},
             {type: 'No mensual', categories: []},
             {type: 'Facturas', categories: [{name:'Agua', assigned: 0, activity:0, available: 0}, {name:'Internet', assigned: 0, activity:0, available: 0}, {name:'Celular', assigned: 0, activity:0, available: 0}]},
@@ -14,10 +15,11 @@ export default {
         }
 
         const budgetBd = {
-            [budget.id]: {}
+            [budget.id]: {},
         };
         
         budget.accountGroup.forEach(account => budgetBd[budget.id][account.type] = account.categories);
+        budgetBd[budget.id].date = budget.date;
 
         await setDoc(doc(db, 'budgets', userId), budgetBd, { merge: true });
 
@@ -74,7 +76,7 @@ export default {
         const budgetAccount = docSnap.data()[data.idBudget];
         const newBudgetAccount = budgetAccount[data.nameAccount].filter(category => category.name !== data.category);
 
-        budgetAccount[data.nameAccount] = newBudgetAccount
+        budgetAccount[data.nameAccount] = newBudgetAccount;
 
         await setDoc(userBudgetRef, {
             [data.idBudget] : budgetAccount
@@ -119,11 +121,14 @@ export default {
         for(const budgetId in docSnap.data()){
             const budget = {
                 id: budgetId,
+                date: docSnap.data()[budgetId].date,
                 accountGroup: []
             }
 
             for(const type in docSnap.data()[budgetId]){
-                budget.accountGroup.push({ type: type, categories: docSnap.data()[budgetId][type]})
+                if(type !== 'date'){
+                    budget.accountGroup.push({ type: type, categories: docSnap.data()[budgetId][type]})
+                }
             }
 
             budgets.push(budget);

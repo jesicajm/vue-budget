@@ -27,13 +27,6 @@ export default {
         hideAddCategory(){
             this.$emit('hide-add-category');
         },
-        validateForm(){
-          this.formIsValid = true;
-          if(this.account.val === ''){
-            this.account.isValid = false;
-            this.formIsValid = false;
-          }
-        },
         submitForm(){
             this.formIsValid = true;
 

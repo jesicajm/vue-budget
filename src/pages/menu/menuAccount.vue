@@ -40,6 +40,7 @@
             </ul>
             <button>Cerrar sesión</button>
        </div>
+       <p @click="loadBudget">{{ budgetId }}</p>
        <div class="menu-item">
             <p v-if="userAccounts.length === 0" class="menu-item__without-accounts">Sin cuentas 
                 <br> 
@@ -59,7 +60,8 @@
                             :account-type="account.accountType"
                             :account-name="account.accountName"
                             :account-balance="account.accountBalance"
-                            @click="selectAccount(account.accountName)"
+                            @select-account="selectAccount(account.accountName)"
+                            @show-edit-account="$emit('show-edit-account', $event)"
                             :class="{selected: account.accountName === selectedAccount }">
                         </item-budget-account>
                     </ul>
@@ -77,7 +79,8 @@
                             :account-type="account.accountType"
                             :account-name="account.accountName"
                             :account-balance="account.accountBalance"
-                            @click="selectAccount(account.accountName)"
+                            @select-account="selectAccount(account.accountName)"
+                            @show-edit-account="$emit('show-edit-account', $event)"
                             :class="{selected: account.accountName === selectedAccount }"> 
                         </item-budget-account>
                     </ul>
@@ -95,7 +98,8 @@
                             :account-type="account.accountType"
                             :account-name="account.accountName"
                             :account-balance="account.accountBalance"
-                            @click="selectAccount(account.accountName)"
+                            @select-account="selectAccount(account.accountName)"
+                            @show-edit-account="$emit('show-edit-account', $event)"
                             :style="{color: account.accountName === selectedAccount ? 'red' : 'green' }"> 
                         </item-budget-account>
                     </ul>
@@ -130,7 +134,7 @@ import ItemBudgetAccount from '../../components/ItemBudgetAccount.vue';
 import GroupAccounts from '../../components/GroupAccounts.vue'
 
 export default {
-    emits:['budget-name', 'add-account-available'],
+    emits:['budget-name', 'add-account-available','show-edit-account'],
     props:['budgetId', 'userAccounts'],
     components:{
        NewBudget,
@@ -259,14 +263,17 @@ export default {
         selectAccount(accountId){
             this.selectedAccount = accountId;
             this.$router.replace(`/budget/${this.budgetId}/${accountId}`);
-        }
+        },
+        loadBudget(){
+            this.$router.replace(`/budget/${this.budgetId}`);
+        },
     }
 }
 </script>
 
 <style scoped>
 .menu{
-  font-size: 15px;
+   font-size: 15px;
 }
 
 .menu-item {

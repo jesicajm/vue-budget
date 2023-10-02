@@ -211,7 +211,7 @@ export default {
             this.isLoading = false;
             this.targets = this.$store.getters['targets/targets'];
             
-        },*/
+        },*/ 
     savePeriod(data) {
       this.period = data.selectedPeriod;
       this.by = data.every;

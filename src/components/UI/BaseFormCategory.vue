@@ -20,7 +20,6 @@ export default {
     display: grid;
     align-content: start;
     z-index: 10;
-    background: white;
     /*justify-content: stretch;
     /*width: 30px;*/
 }

@@ -26,16 +26,6 @@ export default {
             messageInvlidName: null
         };
     },
-    computed:{
-        /*messageInvlidName(){
-            if(!budgetName){
-                return 'El nombre del presupuesto es requerido';
-            }else{
-                const budgets = this.$store.getters['budget/budgetsUser'];
-                budgets.some(budget => budget.id.toLowerCase() === budgetNametoLowerCase())
-            }
-        }*/
-    },
     methods:{
         closeNewBudget(){
             this.$emit('close-new-budget');
@@ -47,13 +37,13 @@ export default {
 
             if(this.budgetName === null){
                 this.formIsValid = false;
-                this.messageInvlidName = 'El nombre del presupuesto es requerido'
+                this.messageInvlidName = 'El nombre del presupuesto es requerido';
                 return;
             }else{
                 const exitsName = budgets.some(budget => budget.id.toLowerCase() === this.budgetName.toLowerCase());
                 if(exitsName){
                     this.formIsValid= false;
-                    this.messageInvlidName = 'El nombre del presupuesto ya existe'
+                    this.messageInvlidName = 'El nombre del presupuesto ya existe';
                     return;
                 }
             }
@@ -61,6 +51,7 @@ export default {
             //this.$emit('budget-name', this.budgetName);
 
             const userId = this.$store.getters['user']; 
+            
             this.$store.dispatch('budget/addBudget', {
                 userId: userId,
                 name: this.budgetName

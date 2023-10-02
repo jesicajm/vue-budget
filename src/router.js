@@ -17,7 +17,7 @@ const router = createRouter({
      /* { path: '/budget', component:Budget, meta: { requiresAuth: true }},*/
       { 
          path: '/budget', 
-         component:BudgetMenu, 
+         component: BudgetMenu, 
          meta: { requiresAuth: true }, 
          children:[
             { path: ':budgetId', component:Budget, meta: { requiresAuth: true }},

@@ -14,14 +14,11 @@ const store = createStore({
    },
     state() {
      return {
-        userId:'c3',
         isLoggedIn: false
      };
     },
     getters: {
-      userId(state){
-         return state.userId;
-      }
+      
     },
     mutations: {
        setAuth(state, payload){

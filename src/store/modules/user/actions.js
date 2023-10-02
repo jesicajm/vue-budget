@@ -1,5 +1,5 @@
 import db from "../../../main";
-import { /*collection, addDoc,*/ doc, setDoc, getDoc } from "firebase/firestore";
+import { /*collection, addDoc,*/ doc, setDoc, getDoc, Timestamp } from "firebase/firestore";
 
 export default {
     async userAccountRegistration(context,payload){
@@ -7,7 +7,15 @@ export default {
         
         const account = {
             [payload.accountName]: { accountBalance: payload.accountBalance,
-                                     accountType: payload.accountType } 
+                                     accountType: payload.accountType, 
+                                     transactions: [{
+                                        date: Timestamp.fromDate(new Date()),
+                                        category: 'saldo inicial',
+                                        menssage: '',
+                                        inflow: payload.accountBalance,
+                                        outflow: null
+                                     }]
+                                    } 
         }
 
         /*const user = {
@@ -23,10 +31,12 @@ export default {
             //
         }*/
 
+    
         context.commit('registerUser', {
             accountBalance: payload.accountBalance,
             accountType: payload.accountType,
-            accountName: payload.accountName
+            accountName: payload.accountName,
+            transactions: account[payload.accountName].transactions
         });
     },
     async loadUser(context,payload){
@@ -64,11 +74,53 @@ export default {
         for(const name in docSnap.data()){
             user.accounts.push({ accountName: name,
             accountType: docSnap.data()[name].accountType,
-            accountBalance: docSnap.data()[name].accountBalance})
+            accountBalance: docSnap.data()[name].accountBalance,
+            transactions: docSnap.data()[name].transactions
+        })
         }
 
         console.log(user)
         context.commit('setUser', user);
 
+    },
+    async editAccount(context,payload){
+        const userId = context.rootGetters.user;
+        console.log(payload)
+       /* const userBudgetRef = doc(db, "targets", userId);
+        const docSnap = await getDoc(userBudgetRef);*/
+
+        const docRef = doc(db,`users/${userId}/${payload.idBudget}/accounts`);
+        const docSnap = await getDoc(docRef);
+
+        if(docSnap.exists()){
+            console.log("Document data:", docSnap.data());
+        }else{
+            // docSnap.data() will be undefined in this case
+            console.log("No such document!");
+        }
+
+        const account = docSnap.data()[payload.accountName];
+
+        console.log(docSnap.data()[payload.accountName]);
+    
+        account.transactions.push({
+            date: Timestamp.fromDate(new Date()),
+            category: 'saldo inicial',
+            menssage: '',
+            inflow: payload.inflow,
+            outflow: payload.outflow
+        })
+
+        account.accountBalance = payload.accountBalance;
+
+        console.log(payload.accountName);
+        console.log(account);
+
+        await setDoc(docRef, {
+            [payload.accountName]: account
+        });    
+
+        context.commit('updateAccount', account);
+        
     }
 };

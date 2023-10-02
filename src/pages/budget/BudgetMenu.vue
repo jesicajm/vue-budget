@@ -1,4 +1,5 @@
 <template>
+  <edit-account v-if="isVisibleEditAccount" @close-edit-account="closeEditAccount" :account-name="accountName" :account-balance="accountBalance" :id-budget="idBudget"></edit-account>
   <div class="view-menu-budget">
     <menu-account
       v-if="!isLoading"
@@ -6,6 +7,7 @@
       :budget-id="idBudget"
       :user-accounts="budgetAccounts"
       @add-account-available="addAccountAvailable"
+      @show-edit-account="showEditAccount"
     ></menu-account>
     <router-view></router-view>
   </div>
@@ -13,15 +15,20 @@
 
 <script>
 import MenuAccount from "../menu/menuAccount.vue";
+import EditAccount from '../../components/EditAccount.vue';
 
 export default {
   components: {
-    MenuAccount
+    MenuAccount,
+    EditAccount
   },
   data() {
     return {
+      isVisibleEditAccount: false,
       isLoading: false,
-      idBudget: null
+      idBudget: null,
+      accountName: null,
+      accountBalance: null
       // budgetName: null,
       // userBudget: null,
       //userAccounts: null
@@ -33,18 +40,21 @@ export default {
     }
   },
   created() {
-    //this.idBudget = this.$route.params.budgetId;
-    //console.log("from created loadBudgets " + this.idBudget);
+    this.idBudget = this.$route.params.budgetId;
+    console.log("from created loadBudgets " + this.$route.params.budgetId);
     this.loadBudgetsTargetsAccounts();
   },
   methods: {
     async loadBudgetsTargetsAccounts() {
       console.log("from load all data components");
+      console.log(this.idBudget);
       this.isLoading = true;
       await this.$store.dispatch("budget/loadBudgets");
     
-      this.idBudget = this.$store.getters["budget/budgetLogin"].id;
-
+      if(this.idBudget === undefined){
+          this.idBudget = this.$store.getters["budget/budgetLogin"].id;
+      }
+      
       this.$router.replace(`/budget/${this.idBudget}`);
 
       await this.$store.dispatch("user/loadUser", this.idBudget);
@@ -54,7 +64,15 @@ export default {
     },
     addAccountAvailable(balanceAccount){
        this.balanceNewAccount = balanceAccount;
-    }
+    },
+    showEditAccount(accountData){
+      this.accountName = accountData.accountName;
+      this.accountBalance = accountData.accountBalance;
+      this.isVisibleEditAccount = true;
+    },
+    closeEditAccount(){
+       this.isVisibleEditAccount = false;
+    } 
   }
 };
 </script>

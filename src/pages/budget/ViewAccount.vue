@@ -1,4 +1,5 @@
 <template>
+   <edit-account v-if="isVisibleEditAccount" @close-edit-account="closeEditAccount" :account-name="accountName" :account-balance="accountBalance"></edit-account>
    <section>
         <div class="header-account">
             <div class="header-account__data">
@@ -9,7 +10,7 @@
                 </div>
             </div>
             <div class="header-account__actions">
-                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" class="bi bi-pen-fill" viewBox="0 0 16 16">
+                <svg @click="showEditAccount" xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" class="bi bi-pen-fill" viewBox="0 0 16 16">
                     <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001z"/>
                 </svg>
                 <button type="button">Conciliado</button>
@@ -17,7 +18,7 @@
         </div>
         <div class="account-balance">
             <div class="account-balance__item">
-                <div>$</div>
+                <div>${{ accountBalance }}</div>
                 <div>Borrar saldo</div>
             </div>
             <div class="account-balance__symbol">
@@ -38,22 +39,27 @@
                 <div>Saldo</div>
             </div>
         </div>
-        <account-balance-details></account-balance-details>
+        <account-balance-details :account-transactions="transactions"></account-balance-details>
    </section>
 </template>
 
 <script>
 import AccountBalanceDetails from '../../components/AccountBalanceDetails.vue';
+import EditAccount from '../../components/EditAccount.vue';
 
 export default {
     props:['accountId'],
     components: {
-         AccountBalanceDetails
+         AccountBalanceDetails,
+         EditAccount
     },    
     data() {
         return {
+            isVisibleEditAccount: false,
             accountName: null,
-            accountType: null
+            accountType: null,
+            accountBalance: null,
+            transactions: null
         }
     },
     /*computed: {
@@ -71,7 +77,16 @@ export default {
             const account = this.$store.getters["user/userAccounts"].find(
             (account) => account.accountName === id);
             this.accountType = account.accountType;
+            this.accountBalance = account.accountBalance;
+            this.transactions = account.transactions;
+       },
+       showEditAccount(){
+          this.isVisibleEditAccount = true;
+       },
+       closeEditAccount(){
+          this.isVisibleEditAccount = false;
        }
+       
     },
     created(){
        this.loadAccount(this.accountId);
@@ -86,6 +101,21 @@ export default {
 
 
 <style scoped>
+.backdrop{
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 10;
+}
+
+dialog {
+   position: fixed;
+   z-index: 100;
+}
+
 section {
    width: 74%;
 }
@@ -137,14 +167,12 @@ section {
     align-self: center;
 }
 
-
 .account-balance__symbol span{
     /*width: 5px;*/
     font-size: 20px;
-    
 }
 
-.subtraction{
+.subtraction {
    display:grid;
    grid-template-rows: repeat(2,4px);
    justify-items: center;

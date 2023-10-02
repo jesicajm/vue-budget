@@ -24,7 +24,6 @@ app.component('base-card', BaseCard);
 app.component('base-form-category', BaseFormCategory);
 app.component('update-category', UpdateCategory);
 
-
 app.mount('#app');
 
 export default db

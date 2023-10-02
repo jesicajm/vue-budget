@@ -1,7 +1,7 @@
 <template>
     <li class="card" @mouseenter="active=true" @mouseleave="active=false">
         <div class="backdrop" v-if="active">
-            <div v-if="showDelete" class="delete-budget" @click="selectBudget" >
+            <div v-if="showDelete" class="delete-budget" @click="selectBudget">
                 <p>{{ nameBudget }}</p>
             </div>
             <svg v-if="showDelete" @click="showConfirmDelete" xmlns="http://www.w3.org/2000/svg" width="16" height="16" color="white" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">

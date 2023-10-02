@@ -15,23 +15,38 @@
                 </svg>
             </div>
         </div>
-        <div>
-            <div class="account-details__tittles">
+        <div class="account-details__transactions">
+            <div class="account-details__transactions-tittles"> 
                 <span>FECHA</span>
                 <span>TENEDOR</span>
                 <span>CATEGORÍA</span>
                 <span>MEMORÁNDUM</span>
                 <span>SALIDA</span>
                 <span>AFLUENCIA</span>
-            </div>    
+            </div>
+            <ul class="account-details__transactions-data" >
+                <item-transactions
+                    v-for="transaction in accountTransactions"
+                    :key="transaction"
+                    :transaction-data="transaction"
+                ></item-transactions>
+            </ul>
         </div>
+        
     </section>
 </template>
 
 <script>
+import ItemTransactions from './ItemTransactions.vue'
+
 export default {
+    components: { ItemTransactions },
+    props:['accountTransactions'],
     data() {
         
+    },
+    created() {
+        console.log(this.accountTransactions)
     }
 }
 </script>
@@ -54,18 +69,35 @@ export default {
    margin-right: 15px;
 }
 
-.account-details__tittles {
+.account-details__transactions {
+    display: grid;
+    grid-template-rows: repeat(2, auto);
+}
+        
+.account-details__transactions-tittles {
+   /* width: 100%;
+    display:flex;
+    align-items: baseline;*/
+    display: grid;
+    grid-template-columns: repeat(6,2fr);
     border-bottom: solid 1px #9d9dc9;
     padding: 3px 0;
 }
 
-.account-details__tittles span{
+.account-details__transactions-tittles span{
    margin-right: 15px;
    padding: 8px;
    border-right: solid 1px #9d9dc9;
 }
 
-.account-details__tittles span:first-child{
+.account-details__transactions-tittles span:first-child{
     font-weight: bold;
 }
+
+.account-details__transactions-data {
+    list-style: none;
+    border-bottom: solid 1px #9d9dc9;
+    padding:0;
+}
+
 </style>

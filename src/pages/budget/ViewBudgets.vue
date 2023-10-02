@@ -95,7 +95,7 @@ ul{
    margin: 0 8px;
 }
 
-li{
+li {
     display: grid;
     place-items: center;
     list-style: none;
@@ -104,7 +104,7 @@ li{
     border: 1px solid rgb(224, 219, 219);
  }
 
-svg{
+svg {
     text-align: center;
  }
 

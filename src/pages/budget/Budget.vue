@@ -1,7 +1,7 @@
 <template>
   <div class="budget-target" v-if="!isLoading">
     <div class="budget-target__header">
-      <h3 class="budget-header__item">Mes</h3>
+      <h3 class="budget-header__item">{{ date }}</h3>
       <available-money
         class="budget-header__item"
         :account-group="accountGroup"
@@ -89,15 +89,19 @@ export default {
           isVisibleAddAccount: false,
           categoryTarget: null,
           idBudget: null,
-          balanceNewAccount: null
+          budgetDate: null,
+          balanceNewAccount: null,
+          date: null,
+          month: null,
+          year: null
         } 
     },
     watch: {
-    budgetName(value) {
-      console.log("from watch budgetName " + value);
-      this.loadBudgets();
+      budgetName(value) {
+        console.log("from watch budgetName " + value);
+        this.loadBudgets();
+      }
     },
-  },
   provide() {
     return {
       selectTarget: this.showTargetCategory,
@@ -109,10 +113,22 @@ export default {
         (budget) => budget.id === this.idBudget
       );
       console.log("from computed accountGroup");
-      console.log(userBudget);
+      console.log(userBudget.accountGroup);
       console.log(this.idBudget);
       return userBudget.accountGroup;
     },
+    /*date(){
+        const userBudget = this.$store.getters["budget/userBudgets"].find(
+        (budget) => budget.id === this.idBudget);
+        console.log(userBudget.date)
+        let date = userBudget.date
+        if(date !== undefined){
+          return date.toDate().getFullYear();
+        }
+     
+        //return date.getMonth() + date.getFullYear()
+        return date;
+    },*/
     showAddNewAccount() {
       return this.isVisibleAddAccount;
     },
@@ -123,6 +139,8 @@ export default {
   created() {
     this.idBudget = this.$route.params.budgetId;
     console.log("from created budget " + this.idBudget);
+    this.setDate();
+
     this.loadBudgetsTargetsAccounts();
   },
   methods: {
@@ -150,11 +168,27 @@ export default {
       await this.$store.dispatch("targets/fetchTargets", this.idBudget);
 
       this.isLoading = false;
+      
     },
     updateCategoryDelete() {
       console.log("from BUDGET emit updateCategoryDelete");
       this.categoryTarget = null;
     },
+    setDate(){
+      const userBudget = this.$store.getters["budget/userBudgets"].find(
+        (budget) => budget.id === this.idBudget);
+        console.log(userBudget.date)
+
+      if(userBudget.date !== undefined){
+        /*const months = ['EN', 'FEBR', 'MZO', 'ABR', 'MY', 'JUN', 'JUL', 'AGT', 'SEPT', 'OCT', 'NOV', 'DIC'] 
+        this.month = months[userBudget.date.toDate().getMonth()];
+        this.year = userBudget.date.toDate().getFullYear();*/
+        
+        this.date = userBudget.date.toDate().toLocaleDateString('es-MX', { year:"numeric", month:"short"});
+       } 
+        
+    }
+  
     /*updateBudgetName(name){
         this.budgetName = name;
         console.log('from emit:' + this.budgetName)
