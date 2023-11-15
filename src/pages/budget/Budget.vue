@@ -6,7 +6,7 @@
         class="budget-header__item"
         :account-group="accountGroup"
         :id-budget="idBudget"
-        :balance-new-account="balanceNewAccount"
+     
       ></available-money>
     </div>
     <div class="budget-target__body">
@@ -117,18 +117,6 @@ export default {
       console.log(this.idBudget);
       return userBudget.accountGroup;
     },
-    /*date(){
-        const userBudget = this.$store.getters["budget/userBudgets"].find(
-        (budget) => budget.id === this.idBudget);
-        console.log(userBudget.date)
-        let date = userBudget.date
-        if(date !== undefined){
-          return date.toDate().getFullYear();
-        }
-     
-        //return date.getMonth() + date.getFullYear()
-        return date;
-    },*/
     showAddNewAccount() {
       return this.isVisibleAddAccount;
     },
@@ -179,20 +167,10 @@ export default {
         (budget) => budget.id === this.idBudget);
         console.log(userBudget.date)
 
-      if(userBudget.date !== undefined){
-        /*const months = ['EN', 'FEBR', 'MZO', 'ABR', 'MY', 'JUN', 'JUL', 'AGT', 'SEPT', 'OCT', 'NOV', 'DIC'] 
-        this.month = months[userBudget.date.toDate().getMonth()];
-        this.year = userBudget.date.toDate().getFullYear();*/
-        
+      if(userBudget.date !== undefined){     
         this.date = userBudget.date.toDate().toLocaleDateString('es-MX', { year:"numeric", month:"short"});
-       } 
-        
+       }    
     }
-  
-    /*updateBudgetName(name){
-        this.budgetName = name;
-        console.log('from emit:' + this.budgetName)
-    }*/
   }
 }
 </script>

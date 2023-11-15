@@ -105,7 +105,7 @@ export default {
     
         account.transactions.push({
             date: Timestamp.fromDate(new Date()),
-            category: 'saldo inicial',
+            category: 'ajuste manual saldo',
             menssage: '',
             inflow: payload.inflow,
             outflow: payload.outflow
@@ -115,12 +115,15 @@ export default {
 
         console.log(payload.accountName);
         console.log(account);
+        console.log(docSnap.data())
 
         await setDoc(docRef, {
-            [payload.accountName]: account
-        });    
+            [payload.accountName]: account  
+        }, { merge: true });    
 
-        context.commit('updateAccount', account);
+        context.commit('updateAccount', {
+            ...account,
+            accountName:payload.accountName});
         
     }
 };

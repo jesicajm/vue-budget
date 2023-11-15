@@ -1,5 +1,5 @@
 <template>
-  <edit-account v-if="isVisibleEditAccount" @close-edit-account="closeEditAccount" :account-name="accountName" :account-balance="accountBalance" :id-budget="idBudget"></edit-account>
+  <edit-account v-if="isVisibleEditAccount" @change-account="loadBudgetsTargetsAccounts" @close-edit-account="closeEditAccount" :account-name="accountName" :account-balance="accountBalance" :id-budget="idBudget"></edit-account>
   <div class="view-menu-budget">
     <menu-account
       v-if="!isLoading"

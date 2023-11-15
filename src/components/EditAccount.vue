@@ -17,7 +17,7 @@
       </div>
       <div>
         <h2 class="card-editAccount__caption">Editar cuenta</h2>
-        <input :value="accountBalance" @input="event => balance=event.target.value"/>
+        <input  type="number" :value="accountBalance" @input="event => balance=event.target.value"/>
         <p>
           Se creará automáticamente una transacción de ajuste si cambia esta
           cantidad.
@@ -38,7 +38,7 @@
 
 <script>
 export default {
-  emits:['close-edit-account'],
+  emits:['close-edit-account', 'change-account'],
   props:['accountName', 'accountBalance', 'idBudget'],
   data() {
     return {
@@ -49,11 +49,18 @@ export default {
       updateBalance: this.accountBalance
     };
   },
+  created(){
+      console.log('from edit account');
+      console.log(this.accountBalance);
+      console.log(this.balance);
+  },
   methods:{
       closeEditAccount(){
          this.$emit('close-edit-account');
       },
-      submitEditAccount(){
+      async submitEditAccount(){
+        this.balance = parseInt(this.balance);
+        console.log(this.balance);
         if(this.updateBalance < this.balance){
            this.inflow = this.balance - this.updateBalance ; 
            this.updateBalance = this.balance;
@@ -64,13 +71,15 @@ export default {
            return;
         }
 
-        this.$store.dispatch('user/editAccount', {
+       await this.$store.dispatch('user/editAccount', {
            idBudget: this.idBudget,
            accountName: this.accountName,
            inflow: this.inflow,
            outflow: this.outflow,
            accountBalance: this.updateBalance
         })
+
+        this.$emit('change-account');
 
         this.closeEditAccount();
       }

@@ -51,7 +51,7 @@ import AllocatedForm from "./AllocatedForm.vue";
 import AssignedFixForm from './AssignedFixForm.vue';
 
 export default {
-  props: ["accountGroup", "idBudget", "balanceNewAccount"],
+  props: ["accountGroup", "idBudget"],
   components: { AllocatedForm, AssignedFixForm },
   data() {
     return {
@@ -66,13 +66,7 @@ export default {
     console.log("from created avalibleMoney");
     console.log(this.accountGroup)
     console.log(this.idBudget)
-    console.log(this.balanceNewAccount)
     this.calculateTotalMoneyAllocate();
-  },
-  watch: {
-    balanceNewAccount(value) {
-      this.totalMoneyAvailable += value;
-    },
   },
   computed: {
     availableMoneyStatus() {
