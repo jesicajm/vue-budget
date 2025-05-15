@@ -3,6 +3,7 @@ export default {
         return rootGetters.userId;
     },*/
     userAccounts(state){
+        console.log('from desde getters userAccounts:', state )
         return (state.user.accounts);
     },
     filterNearSpend(_, getters){

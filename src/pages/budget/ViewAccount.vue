@@ -1,5 +1,4 @@
 <template>
-   <edit-account v-if="isVisibleEditAccount" @close-edit-account="closeEditAccount" :account-name="accountName" :account-balance="accountBalance" :id-budget="budgetId" @change-account="setAccount" ></edit-account>
    <section>
         <div class="header-account">
             <div class="header-account__data">
@@ -39,23 +38,22 @@
                 <div>Saldo</div>
             </div>
         </div>
-        <account-balance-details :account-transactions="transactions"></account-balance-details>
+        <account-balance-details :account-transactions="transactions" :budget-id="budgetId"></account-balance-details>
    </section>
 </template>
 
 <script>
 import AccountBalanceDetails from '../../components/AccountBalanceDetails.vue';
-import EditAccount from '../../components/EditAccount.vue';
+
 
 export default {
     props:['budgetId','accountId'],
+    emits: ['show-edit-account'],
     components: {
          AccountBalanceDetails,
-         EditAccount
     },    
     data() {
         return {
-            isVisibleEditAccount: false,
             accountName: null,
             accountType: null,
             accountBalance: null,
@@ -82,7 +80,9 @@ export default {
             this.transactions = account.transactions;
        },
        showEditAccount(){
-          this.isVisibleEditAccount = true;
+            this.$emit('show-edit-account', {
+            accountName: this.accountName, 
+            accountBalance: this.accountBalance});
        },
        closeEditAccount(){
           this.isVisibleEditAccount = false;
@@ -93,6 +93,7 @@ export default {
        
     },
     created(){
+       console.log(this.accountId)
        this.loadAccount(this.accountId);
     },
     watch:{

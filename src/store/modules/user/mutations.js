@@ -3,11 +3,13 @@ export default {
         state.user.accounts.push(payload);
     },
     setUser(state, payload){
-        state.user = payload
+        state.user = payload;
     },
     updateAccount(state, payload){
-        const account = state.user.accounts.find(account => account.accountName === payload.accountName);
-        account.transactions =  payload.transactions;
-        account.accountBalance = payload.accountBalance;
+        state.user.accounts = [payload];
+    },
+    addTransaction(state, payload){
+        const account = state.user.accounts.find(account => account.accountName.toLowerCase() === payload.accountName.toLowerCase())
+        account.unshift(payload);
     }
 };

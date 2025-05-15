@@ -2,52 +2,49 @@ import db from "../../../main";
 import { /*collection, addDoc,*/ doc, setDoc, getDoc, Timestamp } from "firebase/firestore";
 
 export default {
-    async userAccountRegistration(context,payload){
-        const userId = context.rootGetters.user;
-        
-        const account = {
-            [payload.accountName]: { accountBalance: payload.accountBalance,
-                                     accountType: payload.accountType, 
-                                     transactions: [{
-                                        date: Timestamp.fromDate(new Date()),
-                                        category: 'saldo inicial',
-                                        menssage: '',
-                                        inflow: payload.accountBalance,
-                                        outflow: null
-                                     }]
-                                    } 
+    async validateAndRegisterAccount({ commit, getters, rootGetters }, { budgetId, accountName, accountBalance, accountType }) {
+        const userId = rootGetters.user;
+
+        const accountExists = getters['userAccounts'].some(account => account.accountName.toLowerCase() === accountName.toLowerCase());
+
+        if (accountExists) {
+            throw new Error('Account name already exists');
         }
 
-        /*const user = {
-           [ payload.budgetId ]: { accounts: {[ payload.accountType ]: account }}
-        };*/
+        const account = {
+            [accountName]: {
+                accountBalance,
+                accountType,
+                transactions: [{
+                    date: Timestamp.fromDate(new Date()),
+                    category: 'saldo inicial',
+                    menssage: '',
+                    inflow: accountBalance,
+                    outflow: null
+                }]
+            }
+        }
 
-        const docRef = doc(db, "users", userId, payload.budgetId, "accounts");
+        const docRef = doc(db, "users", userId, budgetId, "accounts");
         await setDoc(docRef, account, { merge: true });
 
-        //await setDoc(doc(db, docRef), account, { merge: true });
-        //const responseData = await response.json();
-        /*if(!response.ok){
-            //
-        }*/
 
-    
-        context.commit('registerUser', {
-            accountBalance: payload.accountBalance,
-            accountType: payload.accountType,
-            accountName: payload.accountName,
-            transactions: account[payload.accountName].transactions
+        commit('registerUser', {
+            accountBalance,
+            accountType,
+            accountName,
+            transactions: account[accountName].transactions
         });
     },
-    async loadUser(context,payload){
+    async loadUser(context, payload) {
         const userId = context.rootGetters.user;
 
         const docRef = doc(db, `users/${userId}/${payload}/accounts`);
         const docSnap = await getDoc(docRef);
 
-        if(docSnap.exists()){
+        if (docSnap.exists()) {
             console.log("Document data:", docSnap.data());
-        }else{
+        } else {
             // docSnap.data() will be undefined in this case
             console.log("No such document!");
         }
@@ -71,59 +68,147 @@ export default {
         console.log(user);*/
         const user = { accounts: [] };
 
-        for(const name in docSnap.data()){
-            user.accounts.push({ accountName: name,
-            accountType: docSnap.data()[name].accountType,
-            accountBalance: docSnap.data()[name].accountBalance,
-            transactions: docSnap.data()[name].transactions
-        })
+        for (const name in docSnap.data()) {
+            user.accounts.push({
+                accountName: name,
+                accountType: docSnap.data()[name].accountType,
+                accountBalance: docSnap.data()[name].accountBalance,
+                transactions: docSnap.data()[name].transactions
+            })
         }
 
         console.log(user)
         context.commit('setUser', user);
 
     },
-    async editAccount(context,payload){
+    async editAccount(context, payload) {
         const userId = context.rootGetters.user;
         console.log(payload)
-       /* const userBudgetRef = doc(db, "targets", userId);
-        const docSnap = await getDoc(userBudgetRef);*/
 
-        const docRef = doc(db,`users/${userId}/${payload.idBudget}/accounts`);
+        const docRef = doc(db, `users/${userId}/${payload.idBudget}/accounts`);
         const docSnap = await getDoc(docRef);
 
-        if(docSnap.exists()){
+        if (docSnap.exists()) {
             console.log("Document data:", docSnap.data());
-        }else{
+            const data = docSnap.data();
+            const originalAccount = data[payload.originalAccountName];
+
+            if (!originalAccount) {
+                throw new Error("Cuenta original no encontrada.");
+            }
+
+            if (payload.originalAccountName !== payload.accountName) {
+
+                data[payload.accountName] = { ...data[payload.originalAccountName], accountName: payload.accountName };
+                delete data[payload.originalAccountName];
+            }
+
+            if (payload.inflow || payload.outflow) {
+                data[payload.accountName].accountBalance = payload.accountBalance;
+                data[payload.accountName].transactions.push({
+                    date: Timestamp.fromDate(new Date()),
+                    category: "ajuste manual saldo",
+                    message: "",
+                    inflow: payload.inflow,
+                    outflow: payload.outflow,
+                });
+            }
+
+            console.log(data[payload.accountName]);
+
+            console.log(payload.accountName);
+
+            console.log(docSnap.data());
+            console.log(data);
+
+
+            await setDoc(docRef, data);
+
+            context.commit('updateAccount', {
+                ...data
+            });
+
+
+        } else {
             // docSnap.data() will be undefined in this case
             console.log("No such document!");
         }
 
-        const account = docSnap.data()[payload.accountName];
 
-        console.log(docSnap.data()[payload.accountName]);
+    },
+    async deleteAccount(context, payload) {
+        const userId = context.rootGetters.user;
+        console.log(payload)
+
+        const docRef = doc(db, `users/${userId}/${payload.idBudget}/accounts`);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            console.log("Document data:", docSnap.data());
+            const data = docSnap.data();
+            const account = data[payload.accountName];
+
+            if (!account) {
+                throw new Error("Cuenta original no encontrada.");
+            }
+
+            delete data[payload.accountName];
+
+            console.log(payload.accountName);
+
+            console.log(data);
+
+            await setDoc(docRef, data);
+
+            context.commit('updateAccount', {
+                ...data
+            });
+
+        } else {
+            // docSnap.data() will be undefined in this case
+            console.log("No such document!");
+        }
+
+    },
+    async addTransaction({ commit, rootGetters },{ budgetId, accountName, category, inflow, outflow }){
+
+        const userId = rootGetters.user;
+
+        const docRef = doc(db,`users/${userId}/${budgetId}/accounts`);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            console.log("Document data:", docSnap.data());
+            const data = docSnap.data();
+            const originalAccount = data[accountName];
+
+            if(!originalAccount) {
+                throw new Error("Cuenta original no encontrada.");
+            }
+
+            const newTrasaction = {
+                date: Timestamp.fromDate(new Date()),
+                category: category,
+                inflow: inflow,
+                outflow: outflow,
+            };
     
-        account.transactions.push({
-            date: Timestamp.fromDate(new Date()),
-            category: 'ajuste manual saldo',
-            menssage: '',
-            inflow: payload.inflow,
-            outflow: payload.outflow
-        })
+            data[accountName].transactions.unshift(newTrasaction);
 
-        account.accountBalance = payload.accountBalance;
+            console.log(docSnap.data());
+            console.log(data);
 
-        console.log(payload.accountName);
-        console.log(account);
-        console.log(docSnap.data())
 
-        await setDoc(docRef, {
-            [payload.accountName]: account  
-        }, { merge: true });    
+            await setDoc(docRef, data);
 
-        context.commit('updateAccount', {
-            ...account,
-            accountName:payload.accountName});
+            commit('addTransaction', {
+                ...newTrasaction,
+                accountName
+            });
+            } else {
+            // docSnap.data() will be undefined in this case
+            console.log("No such document!");
+            }
         
     }
 };

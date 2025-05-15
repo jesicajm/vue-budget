@@ -94,7 +94,8 @@ export default {
  
         context.commit('setUser', {
            token: user.accessToken,
-           userId: user.uid
+           userId: user.uid,
+           email: payload.email
            //tokenExpiration: responseData.expiresIn,
         });
 

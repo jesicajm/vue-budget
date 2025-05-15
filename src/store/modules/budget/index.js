@@ -6,7 +6,14 @@ export default {
   namespaced: true,
   state(){
     return {
-       budgets: []
+       budgetName: null,
+       budgets: [],
+       accountGroups: [],
+       categories:[],
+       isLoading: false, 
+       //totalMoneyAvailable: 0, // Total dinero disponible
+       debitBalance: 0,       // Balance de crédito
+       moneyAllocated: 0       // Dinero asignado
     };
   },
   mutations,

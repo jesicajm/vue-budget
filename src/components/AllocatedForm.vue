@@ -67,9 +67,11 @@
        <menu-assign-categories
           class="group-category"
           v-if="isVisibleGroupCategories"
-          :account-group="accountGroup"
           @selected-category="setCategoryAccount"
-       ></menu-assign-categories>
+       >
+       <p class="categories-group__tittle">
+          Categorias Presupuesto
+        </p></menu-assign-categories>
     </section>
   </base-form-category>
 </template>
@@ -80,7 +82,7 @@ import MenuAssignCategories from './MenuAssignCategories.vue';
 
 export default {
   emits:['hide-allocated-form','new-value-assigned','selected-category'],
-  props: ["accountGroup", "idBudget", 'totalMoneyAvailable'],
+  props: [ "idBudget", 'totalMoneyAvailable'],
   components: {
     BaseFormCategory,
     MenuAssignCategories
@@ -127,6 +129,7 @@ export default {
        this.moneyAllocated = selectedCategory.moneyAssigned;
        this.moneyAvailable = selectedCategory.moneyAvailable;
        this.isVisibleGroupCategories = false;
+
     },
     submitMoneyAllocate(){
        this.valueMoneyAllocate = Number(this.valueMoneyAllocate);
@@ -141,7 +144,8 @@ export default {
           updateAvailableCategory: this.moneyAvailable
        });
 
-
+       this.$store.dispatch("budget/updateMoneyAllocate", this.moneyAllocated);
+       
        this.$emit('new-value-assigned', this.valueMoneyAllocate);
 
        this.$emit('hide-allocated-form');
@@ -198,6 +202,12 @@ section {
 
 .section-manually__actions:first-child{
    margin-right: 10px;
+}
+
+.categories-group__tittle {
+  margin: 0;
+  border-bottom: 1px solid rgb(161, 152, 152);
+  font-weight: bold;
 }
 
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="available-money" :class="availableMoneyStatus">
+  <div class="available-money" :class="{'positive': totalMoneyAvailable > 0, 'zero': totalMoneyAvailable === 0, 'negative': totalMoneyAvailable < 0}">
     <p>
       $ {{ totalMoneyAvailable }}<span>{{ textAvailableMoney }}</span>
     </p>
@@ -18,17 +18,16 @@
         />
       </svg>
       <button
-        v-if="this.totalMoneyAvailable > 0 || this.totalMoneyAvailable < 0"
+        v-if="totalMoneyAvailable > 0 || totalMoneyAvailable < 0"
         @click="showForm"
-        :class="buttonStatus"
+        :class="{'positiveButton': totalMoneyAvailable > 0, 'zeroButton': totalMoneyAvailable === 0, 'negativeButton': totalMoneyAvailable < 0}"
       >
-        {{ this.totalMoneyAvailable > 0 ? "Asignar" : "Arregla esto" }}
+        {{ totalMoneyAvailable > 0 ? "Asignar" : "Arregla esto" }}
       </button>
       <assigned-fix-form
         class="available-money__fix-form"
         v-if="isVisibleFixForm"
         :id-budget="idBudget"
-        :account-group="accountGroup"
         :total-money-available="totalMoneyAvailable"
         @new-value-assigned="addValueUnassigned"
         @hide-allocated-form="hideFixForm"
@@ -36,7 +35,6 @@
       <allocated-form
         class="available-money__allocated-form"
         v-if="isVisibleFormAllocate"
-        :account-group="accountGroup"
         :id-budget="idBudget"
         :total-money-available="totalMoneyAvailable"
         @new-value-assigned="subtractValueAssigned"
@@ -51,41 +49,33 @@ import AllocatedForm from "./AllocatedForm.vue";
 import AssignedFixForm from './AssignedFixForm.vue';
 
 export default {
-  props: ["accountGroup", "idBudget"],
+  props: ["idBudget"],
+  emits: ['set-total-money-available', 'new-value-assigned','hide-allocated-form'],
   components: { AllocatedForm, AssignedFixForm },
   data() {
     return {
-      totalMoneyAvailable: 0,
       isVisibleFormAllocate: false,
       isVisibleFixForm: false,
       moneyAllocated: 0,
       creditBalance: 0
     };
   },
-  created() {
-    console.log("from created avalibleMoney");
-    console.log(this.accountGroup)
-    console.log(this.idBudget)
-    this.calculateTotalMoneyAllocate();
+  // created() {
+  //   console.log("from created avalibleMoney");
+  //   console.log(this.accountGroup)
+  //   console.log(this.idBudget)
+  //   this.calculateTotalMoneyAllocate();
+  // },
+  mounted() {
+    this.$store.dispatch("budget/calculateTotalMoneyAllocate")
+    .then(() => this.$store.dispatch("user/loadUser", this.idBudget))
+    .then(() => {
+        this.$store.dispatch("budget/calculateDebitBalance")
+    });
   },
   computed: {
-    availableMoneyStatus() {
-      if (this.totalMoneyAvailable > 0) {
-        return { positive: true };
-      } else if (this.totalMoneyAvailable === 0) {
-        return { zero: true };
-      } else {
-        return { negative: true };
-      }
-    },
-    buttonStatus() {
-      if (this.totalMoneyAvailable > 0) {
-        return { positiveButton: true };
-      } else if (this.totalMoneyAvailable === 0) {
-        return { zeroButton: true };
-      } else {
-        return { negativeButton: true };
-      }
+    totalMoneyAvailable() {
+      return this.$store.getters['budget/totalMoneyAvailable'];
     },
     textAvailableMoney() {
       if (this.totalMoneyAvailable > 0) {
@@ -126,7 +116,7 @@ export default {
     addValueUnassigned(valueUnassign){
       this.totalMoneyAvailable += valueUnassign;
     },
-    async calculateTotalMoneyAllocate() {
+    /*async calculateTotalMoneyAllocate() {
       console.log(this.moneyAllocated)
       for(const account of this.accountGroup) {
         account.categories.forEach(
@@ -152,7 +142,7 @@ export default {
 
       this.$emit("set-total-money-available", this.totalMoneyAvailable);
 
-    },
+    },*/
     submitMoneyAllocate(){
        this.moneyAllocatedCategory += Number(this.valueMoneyAllocate);
        

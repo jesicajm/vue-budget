@@ -14,17 +14,17 @@
             <section v-if="viewType === 'addAccount'" class="card-NewAccount__body">
               <div>
                 <label>Ponle un nombre</label>
-                <input type="text" v-model.trim="accountName" :class="{ invalid: nameInvalid }">
-                <p v-if="nameInvalid" class="card-NewAccount__invalid-form"> Este nombre de cuenta ya existe</p>
+                <input type="text" v-model.trim="account.name" :class="{ invalid: nameExists }">
+                <p v-if="nameExists" class="card-NewAccount__invalid-form"> Este nombre de cuenta ya existe</p>
                 <label>¿Qué tipo de cuenta está agregando?</label>
                 <div class="card-NewAccount__body-input" @click="selectAccountType">
-                   <p> {{ accountType ? accountType : 'Seleccione el tipo de cuenta...'  }}</p>
+                   <p> {{ account.type ? account.type : 'Seleccione el tipo de cuenta...'  }}</p>
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
                         <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
                     </svg>
                 </div>    
                 <label>¿Cuál es el saldo de su cuenta actual?</label>
-                <input type="number" v-model.trim="accountBalance" placeholder="">
+                <input type="number" v-model.trim="account.balance" placeholder="">
               </div>
             </section>
             <button  v-if="viewType === 'addAccount'" type="button" :class="disabledButton ? 'btn btn-secondary' : 'btn btn-primary'" :disabled="disabledButton" @click="submitAccountRegistration">Siguiente</button>
@@ -56,12 +56,15 @@
 
 export default {
     props:['budgetId'],
-    emits: ['close-add-account', 'add-account-available'],
+    emits: ['close-add-account'],
     data(){
         return {
             viewType: 'addAccount',
-            accountName: null,
-            accountBalance: null,
+            account: {
+                name: '',
+                balance: null,
+                type: null
+            },
             accountType: null,
             isVisibleAddAccount: false,
             nameExists: false,
@@ -76,22 +79,20 @@ export default {
             }
         },
         disabledButton(){
-          if(this.accountName && this.accountBalance && this.accountType){
-            return false;
-          }else{
-            return true;
-          }
-        },
-        nameInvalid(){
-            return this.nameExists;
-        }   
+          return !(this.account.name && this.account.balance && this.account.type)
+        }
     },
     watch:{
-        accountType(value){
+        'account.type'(value){
            if(value){
                this.showAddAccount();
            }
-        }
+        },
+        'account.name': function(newName) {
+            this.nameExists = this.$store.getters['user/userAccounts'].some(
+            account => account.accountName.toLowerCase() === newName.toLowerCase()
+        );
+  }
     },
     methods:{
         selectAccountType(){
@@ -101,33 +102,37 @@ export default {
             this.viewType = 'addAccount';
         },
         setAccountType(type){
-            this.accountType = type;
+            this.account.type = type;
         },
         async submitAccountRegistration(){
-            this.nameExists = this.$store.getters['user/userAccounts'].some(account => account.accountName.toLowerCase() === this.accountName.toLowerCase());
-             
-            if(this.nameExists){
-                return;
+
+            if (this.nameExists) {
+                return; // Si el nombre de la cuenta ya existe, no hacer nada
             }
 
-            await this.$store.dispatch('user/userAccountRegistration', {
-                budgetId: this.budgetId,
-                accountName: this.accountName,
-                accountBalance: this.accountBalance,
-                accountType: this.accountType
-              }
-            );
+            try {
+                await this.$store.dispatch('user/validateAndRegisterAccount', {
+                    budgetId: this.budgetId,
+                    accountName: this.account.name,
+                    accountBalance: this.account.balance,
+                    accountType: this.account.type
+                });
 
-            if(this.accountType === 'Ahorros' || this.accountType === 'Cuenta corriente' || this.accountType ==='Efectivo'){
-                this.$emit('add-account-available', this.accountBalance);
+                console.log('cuenta registrada');
+
+                if(this.account.type === 'Ahorros' || this.account.type === 'Cuenta corriente' || this.account.type ==='Efectivo'){
+                this.$store.dispatch('budget/updateDebitBalance', this.account.balance);
+                }
+
+                this.$emit('close-add-account');   
+            }catch (error) {
+                console.error('Error registering account:', error.message);
             }
-
-            this.$emit('close-add-account');   
         },
         closeAddAccount(){
-            this.$emit('close-add-account'); 
-        }
-    }
+            this.$emit('close-add-account');
+        }  
+    }      
 }
 
 </script>

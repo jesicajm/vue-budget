@@ -11,13 +11,14 @@
     <div class="card-editAccount__body">
       <div>
         <label>Nombre de cuenta</label>
-        <input :value="accountName" @input="event => name=event.target.value"/>
+        <input v-model="localAccountName"/>
+        <p v-if="nameExists" class="card-NewAccount__invalid-form"> Este nombre de cuenta ya existe</p>
         <label>Notas de cuenta</label>
         <textarea v-model.trim="budgetName"></textarea>
       </div>
       <div>
         <h2 class="card-editAccount__caption">Editar cuenta</h2>
-        <input  type="number" :value="accountBalance" @input="event => balance=event.target.value"/>
+        <input type="number" v-model.number="localAccountBalance" />
         <p>
           Se creará automáticamente una transacción de ajuste si cambia esta
           cantidad.
@@ -26,7 +27,7 @@
     </div>
     <div class="card-editAccount__actions">
       <div>
-        <button >Cerrar cuenta</button>
+        <button @click="deleteAccount">Eliminar cuenta</button>
       </div>
       <div>
         <button @click="closeEditAccount" type="button">Cancelar</button>
@@ -38,15 +39,17 @@
 
 <script>
 export default {
-  emits:['close-edit-account', 'change-account'],
-  props:['accountName', 'accountBalance', 'idBudget'],
+  emits:['close-edit-account', 'change-account', 'change-menu-budget'],
+  props:['accountName', 'accountBalance', 'accountType', 'idBudget'],
   data() {
     return {
-      name: null,
-      balance:null,
+      localAccountName: this.accountName,
+      localAccountBalance: this.accountBalance,
+      originalAccountName: this.accountName,
       inflow: null,
       outflow: null,
-      updateBalance: this.accountBalance
+      updateBalance: this.accountBalance,
+      nameExists: false
     };
   },
   created(){
@@ -54,32 +57,56 @@ export default {
       console.log(this.accountBalance);
       console.log(this.balance);
   },
+  watch:{
+      localAccountName(newName) {
+          this.nameExists = this.$store.getters['user/userAccounts'].some(
+            account => account.accountName.toLowerCase() === newName.toLowerCase()
+          );
+      }
+  },
   methods:{
       closeEditAccount(){
          this.$emit('close-edit-account');
       },
       async submitEditAccount(){
-        this.balance = parseInt(this.balance);
-        console.log(this.balance);
-        if(this.updateBalance < this.balance){
-           this.inflow = this.balance - this.updateBalance ; 
-           this.updateBalance = this.balance;
-        }else if(this.updateBalance > this.balance){
-           this.outflow = this.updateBalance - this.balance;
-           this.updateBalance = this.balance;
-        }else{
-           return;
+        if (this.nameExists) {
+            return; // Si el nombre de la cuenta ya existe, no hacer nada
+        }
+
+        if(this.localAccountBalance < this.accountBalance){
+           this.inflow = this.accountBalance - this.localAccountBalance; 
+        }else if(this.localAccountBalance > this.accountBalance){
+           this.outflow = this.localAccountBalance - this.accountBalance;
+        }
+
+        if (this.localAccountBalance === this.accountBalance && this.localAccountName === this.accountName) {
+          return;
         }
 
        await this.$store.dispatch('user/editAccount', {
            idBudget: this.idBudget,
-           accountName: this.accountName,
+           accountName: this.localAccountName,
+           originalAccountName: this.originalAccountName,
            inflow: this.inflow,
            outflow: this.outflow,
-           accountBalance: this.updateBalance
+           accountBalance: this.localAccountBalance
         })
 
-        this.$emit('change-account');
+        this.$emit('change-account', this.localAccountName);
+
+        this.closeEditAccount();
+      },
+      async deleteAccount(){
+        await this.$store.dispatch('user/deleteAccount', {
+           idBudget: this.idBudget,
+           accountName: this.localAccountName
+        })
+
+        if(this.accountType === 'Ahorros' || this.accountType === 'Cuenta corriente' || this.accountType ==='Efectivo'){
+           this.$store.dispatch('budget/updateDebitBalance', -this.localAccountBalance);
+        }
+
+        this.$emit('change-menu-budget');
 
         this.closeEditAccount();
       }
@@ -118,6 +145,13 @@ export default {
   font-size: 22px;
 }
 
+.card-NewAccount__invalid-form {
+    padding: 5px;
+    color:white;
+    background: red;
+    margin: 0;
+}
+
 h2 {
   font-size: 17px;
 }
@@ -144,6 +178,11 @@ p {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+dialog {
+   position: fixed;
+   z-index: 100;
 }
 
 </style>

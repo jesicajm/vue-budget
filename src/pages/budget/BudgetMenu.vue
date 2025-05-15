@@ -1,78 +1,114 @@
 <template>
-  <edit-account v-if="isVisibleEditAccount" @change-account="loadBudgetsTargetsAccounts" @close-edit-account="closeEditAccount" :account-name="accountName" :account-balance="accountBalance" :id-budget="idBudget"></edit-account>
-  <div class="view-menu-budget">
-    <menu-account
-      v-if="!isLoading"
-      class="menu"
-      :budget-id="idBudget"
-      :user-accounts="budgetAccounts"
-      @add-account-available="addAccountAvailable"
-      @show-edit-account="showEditAccount"
-    ></menu-account>
-    <router-view></router-view>
-  </div>
+  <div v-if="isLoading">Cargando datos...</div>
+  <div v-else class="view-menu-budget">
+    <edit-account
+      v-if="isVisibleEditAccount"
+      @change-account="updateAccount"
+      @close-edit-account="closeEditAccount"
+      @change-menu-budget="updateMenuBudget"
+      :account-name="accountName"
+      :account-balance="accountBalance"
+      :account-type="accountType"
+      :id-budget="budgetId"
+    ></edit-account>
+    <menu-view 
+        :budget-id="budgetId" 
+        @account-selected="showAccount"
+        @show-edit-account="showEditAccount"></menu-view>
+    <budget
+        v-if="!isLoading && isVisibleBudget"
+        @update-total-money-available="handleTotalMoneyUpdate"
+        :budget-name="budgetName"
+    ></budget>
+    <view-account
+        v-if="!isLoading && isVisibleViewAccount"
+        :budget-id="budgetId"
+        :account-id="accountName"
+        @show-edit-account="showEditAccount"
+    ></view-account>
+  </div>  
 </template>
 
 <script>
-import MenuAccount from "../menu/menuAccount.vue";
-import EditAccount from '../../components/EditAccount.vue';
+import MenuView from "./MenuView.vue";
+import EditAccount from "../../components/EditAccount.vue";
+import Budget from "./Budget.vue";
+import ViewAccount from "./ViewAccount.vue";
+import { mapState } from 'vuex';
+import { mapGetters } from "vuex";
+
+
 
 export default {
   components: {
-    MenuAccount,
+    MenuView,
+    Budget,
+    ViewAccount,
     EditAccount
   },
   data() {
     return {
-      isVisibleEditAccount: false,
-      isLoading: false,
-      idBudget: null,
+      isVisibleBudget: true,
+      // isLoading: false,
       accountName: null,
-      accountBalance: null
+      accountBalance: null,
+      accountType: null,
+      isVisibleViewAccount: false,
+      isVisibleEditAccount: false
       // budgetName: null,
       // userBudget: null,
       //userAccounts: null
     };
   },
   computed: {
-    budgetAccounts() {
-      return this.$store.getters["user/userAccounts"];
-    }
+    ...mapState('budget', ['isLoading']),
+    ...mapGetters('budget', ['budgetName'])
   },
   created() {
-    this.idBudget = this.$route.params.budgetId;
-    console.log("from created loadBudgets " + this.$route.params.budgetId);
-    this.loadBudgetsTargetsAccounts();
+     this.loadBudgetsTargetsAccounts();
   },
   methods: {
     async loadBudgetsTargetsAccounts() {
       console.log("from load all data components");
-      console.log(this.idBudget);
-      this.isLoading = true;
-      await this.$store.dispatch("budget/loadBudgets");
-    
-      if(this.idBudget === undefined){
-          this.idBudget = this.$store.getters["budget/budgetLogin"].id;
+      
+      console.log(this.budgetName)
+
+      if(!this.budgetName){
+          await this.$store.dispatch("budget/loadBudgets");
       }
-      
-      this.$router.replace(`/budget/${this.idBudget}`);
 
-      await this.$store.dispatch("user/loadUser", this.idBudget);
+      console.log(this.budgetName)
+      //await this.$store.dispatch("user/loadUser", this.budgetId);
 
-      this.isLoading = false;
-      
     },
-    addAccountAvailable(balanceAccount){
-       this.balanceNewAccount = balanceAccount;
+    showAccount(accountName) {
+      this.accountName = accountName;
+      this.isVisibleViewAccount = true;
+      this.isVisibleBudget = false;
     },
-    showEditAccount(accountData){
+    showEditAccount(accountData) {
       this.accountName = accountData.accountName;
       this.accountBalance = accountData.accountBalance;
+      this.accountType = accountData.accountType;
       this.isVisibleEditAccount = true;
     },
-    closeEditAccount(){
-       this.isVisibleEditAccount = false;
-    } 
+    closeEditAccount() {
+      this.isVisibleEditAccount = false;
+    },
+    async updateAccount(accountName) {
+      this.isLoading = true;
+      this.accountName = accountName;
+      await this.$store.dispatch("user/loadUser", this.budgetId);
+        this.isVisibleViewAccount = true;
+        this.isVisibleBudget = false;
+        this.isLoading = false;
+    },
+    async updateMenuBudget(){
+      this.isLoading = true;
+      await this.$store.dispatch("user/loadUser", this.budgetId);
+      this.isVisibleBudget = true;
+      this.isLoading = false;
+    }
   }
 };
 </script>
@@ -80,14 +116,25 @@ export default {
 <style scoped>
 .view-menu-budget {
   width: 100%;
-  display:flex;
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 30fr 70fr;
+  display: flex;
   align-items: baseline;
-
 }
 
-.menu {
-  padding: 15px;
+/* .menu {
+  width: 100%;
+  padding: 20px;
+  height: 100%;
+  box-sizing: border-box;
   background: rgb(99, 99, 163);
+} */
+
+h4 {
+  color: #ffffff;
 }
+
 
 </style>

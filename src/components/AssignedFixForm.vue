@@ -25,7 +25,6 @@
     <menu-assign-categories
         class="group-category"
         v-if="isVisibleGroupCategories"
-        :account-group="accountGroup"
         @selected-category="setCategoryAccount"
     ></menu-assign-categories>
   </base-form-category>
@@ -41,7 +40,7 @@ export default {
     BaseFormCategory
   },
   emits:['hide-allocated-form','new-value-assigned','selected-category'],
-  props: ["accountGroup", "idBudget", 'totalMoneyAvailable'],
+  props: ["idBudget", 'totalMoneyAvailable'],
   data() {
     return {
         isVisibleGroupCategories: false,

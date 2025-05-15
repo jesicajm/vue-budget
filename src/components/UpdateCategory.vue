@@ -11,7 +11,7 @@
                     <button @click="hideUpdateCategory">Cancelar</button>
                     <button>Ok</button>
                 </div>
-            </div>
+             </div>
     </base-form-category>
 </template>
 

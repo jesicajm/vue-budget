@@ -50,12 +50,12 @@ export default {
       });*/
       
       const userId = this.$store.getters['user']; 
-      this.$store.dispatch('budget/addBudget', {
+      await this.$store.dispatch('budget/addBudget', {
         userId: userId,
         name: 'Mi Presupuesto'
       });
       
-      this.$router.replace('/budget/Mi Presupuesto');
+      this.$router.replace('/budget');
 
       this.isLoading = false;
 

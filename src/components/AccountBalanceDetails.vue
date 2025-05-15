@@ -2,7 +2,7 @@
     <section class="account-details">
         <div class="account-details__actions">
            <div>
-                <span>Agregar transacción</span>
+                <a @click="showAddTransaction()">Agregar transacción</a>
                 <span>Importación de archivos</span>
                 <span>Edit</span>
                 <span>Deshacer</span>
@@ -25,6 +25,11 @@
                 <span>AFLUENCIA</span>
             </div>
             <ul class="account-details__transactions-data" >
+                <add-transaction 
+                    v-if="isVisibleAddTransaction"
+                    @hide-add-transaction="closeAddTransaction()"
+                    :budget-id="budgetId">
+                </add-transaction>
                 <item-transactions
                     v-for="transaction in accountTransactions"
                     :key="transaction"
@@ -37,17 +42,29 @@
 </template>
 
 <script>
-import ItemTransactions from './ItemTransactions.vue'
+import ItemTransactions from './ItemTransactions.vue';
+import AddTransaction from './AddTransaction.vue';
+
 
 export default {
-    components: { ItemTransactions },
-    props:['accountTransactions'],
+    components: { ItemTransactions, AddTransaction },
+    props:['accountTransactions', 'budgetId'],
     data() {
-        
+        return {
+           isVisibleAddTransaction: false  
+        }
     },
     created() {
         console.log(this.accountTransactions)
-    }
+    }, 
+    methods:{
+        showAddTransaction(){
+            this.isVisibleAddTransaction = true;
+        },
+        closeAddTransaction(){
+            this.isVisibleAddTransaction = false;
+        }
+    }    
 }
 </script>
 

@@ -1,12 +1,11 @@
 <template>
-  <div class="budget-target" v-if="!isLoading">
+  <div class="budget-target">
     <div class="budget-target__header">
       <h3 class="budget-header__item">{{ date }}</h3>
       <available-money
         class="budget-header__item"
-        :account-group="accountGroup"
-        :id-budget="idBudget"
-     
+        :id-budget="budgetId"
+        @set-total-money-available="updateTotalMoneyAvailable"
       ></available-money>
     </div>
     <div class="budget-target__body">
@@ -29,7 +28,7 @@
           <new-account
             v-if="showAddNewAccount"
             class="newAccount"
-            :account-group="accountGroup"
+            :account-group="accountGroup(budgetId)"
             @hide-add-category="showAddAccount"
             @save-data="saveData"
           >
@@ -42,26 +41,40 @@
             <span>Actividad</span>
             <span>Disponible</span>
           </div>
-          <div class="budget__body-category-group">
-            <ul v-if="!isLoading">
-              <tarjeta-group
-                v-for="account in accountGroup"
-                :key="account.type"
-                :name-account="account.type"
+          <div
+            class="budget__body-category-group"
+          >
+            <ul>
+                <item-group 
+                 v-for="group in accountGroups(budgetName)"
+                :key="group.name"
+                   
+                    :groupName="group.name"
+                    @toggle-show-categories="handletoggleCategories">
+            
+                
+            </item-group>
+            
+
+              <!-- <li>
+                 <tarjeta-group
+                v-for="category in group.categories"
+                :key="category.name"
+                :name-account="group.groupName"
                 :categories="account.categories"
-                :id-budget="idBudget"
+                :id-budget="budgetId"
                 @update-category-delete="updateCategoryDelete"
               >
               </tarjeta-group>
+              </li> -->
             </ul>
           </div>
         </div>
       </div>
       <target-category
-        v-if="!isLoading"
         :targets-categories="targets"
         :category-target="categoryTarget"
-        :id-budget="idBudget"
+        :id-budget="budgetId"
         class="target"
       >
       </target-category>
@@ -70,66 +83,71 @@
 </template>
 
 <script>
-import TarjetaGroup from "../../components/TarjetaGroup.vue";
+//import TarjetaGroup from "../../components/TarjetaGroup.vue";
 import NewAccount from "../../components/NewAccount.vue";
+import ItemGroup from "../../components/ItemGroup.vue"
 import TargetCategory from "../targets/TargetCategory.vue";
 import AvailableMoney from "../../components/AvailableMoney";
-
+import { mapGetters } from "vuex";
 
 export default {
-    components: {
-      TarjetaGroup,
-      NewAccount,
-      TargetCategory,
-      AvailableMoney
-    },
-    data() {
-        return{
-          isLoading: false,
-          isVisibleAddAccount: false,
-          categoryTarget: null,
-          idBudget: null,
-          budgetDate: null,
-          balanceNewAccount: null,
-          date: null,
-          month: null,
-          year: null
-        } 
-    },
-    watch: {
-      budgetName(value) {
-        console.log("from watch budgetName " + value);
-        this.loadBudgets();
-      }
-    },
+  components: {
+    // TarjetaGroup,
+    NewAccount,
+    ItemGroup,
+    TargetCategory,
+    AvailableMoney
+  },
+  data() {
+    return {
+      isVisibleAddAccount: false,
+      categoryTarget: null,
+      budgetDate: null,
+      balanceNewAccount: null,
+      date: null,
+      month: null,
+      year: null,
+    };
+  },
   provide() {
     return {
       selectTarget: this.showTargetCategory,
     };
   },
+  async created() {
+ 
+
+    // this.idBudget = this.$route.params.budgetId;
+    //console.log("from created budget " + this.idBudget);
+    /* console.log(this.budgetId);
+    try {
+      await this.$store.dispatch("budget/fetchBudgetById", this.budgetId);
+      // Asegúrate de que los datos ya están cargados antes de ejecutar cualquier otra lógica
+      console.log("AccountGroup has been loaded:", this.accountGroup);
+    } catch (error) {
+      console.error("Error loading account group:", error);
+    }
+    this.setDate();*/
+  },
   computed: {
-    accountGroup() {
-      const userBudget = this.$store.getters["budget/userBudgets"].find(
-        (budget) => budget.id === this.idBudget
-      );
-      console.log("from computed accountGroup");
-      console.log(userBudget.accountGroup);
-      console.log(this.idBudget);
-      return userBudget.accountGroup;
-    },
+    ...mapGetters("budget", ["budgetName", "accountGroups", "categoriesByGroup"]),
+    /* accountGroup() {
+     
+      // return this.$store.getters["budget/accountGroup"];
+    
+      // const userBudget = this.$store.getters["budget/userBudgets"].find(
+      //   (budget) => budget.id === this.budgetId
+      // );
+      // console.log("from computed accountGroup");
+      // console.log(userBudget.accountGroup);
+      // console.log(this.budgetId);
+      // return userBudget.accountGroup;*/
     showAddNewAccount() {
       return this.isVisibleAddAccount;
     },
     targets() {
       return this.$store.getters["targets/targets"];
-    },
-  },
-  created() {
-    this.idBudget = this.$route.params.budgetId;
-    console.log("from created budget " + this.idBudget);
-    this.setDate();
-
-    this.loadBudgetsTargetsAccounts();
+    }
   },
   methods: {
     showAddAccount() {
@@ -138,7 +156,7 @@ export default {
     async saveData(data) {
       await this.$store.dispatch("budget/addAccount", {
         nameAccount: data,
-        idBudget: this.idBudget,
+        idBudget: this.budgetId,
       });
 
       this.showAddAccount();
@@ -149,30 +167,28 @@ export default {
     showTargetCategory(category) {
       this.categoryTarget = category;
     },
-    async loadBudgetsTargetsAccounts() {
-      console.log("from load all data components");
-      this.isLoading = true;
-
-      await this.$store.dispatch("targets/fetchTargets", this.idBudget);
-
-      this.isLoading = false;
-      
-    },
     updateCategoryDelete() {
       console.log("from BUDGET emit updateCategoryDelete");
       this.categoryTarget = null;
     },
-    setDate(){
+    setDate() {
       const userBudget = this.$store.getters["budget/userBudgets"].find(
-        (budget) => budget.id === this.idBudget);
-        console.log(userBudget.date)
+        (budget) => budget.id === this.budgetId
+      );
+      console.log(userBudget);
 
-      if(userBudget.date !== undefined){     
-        this.date = userBudget.date.toDate().toLocaleDateString('es-MX', { year:"numeric", month:"short"});
-       }    
+      if (userBudget.date !== undefined) {
+        this.date = userBudget.date
+          .toDate()
+          .toLocaleDateString("es-MX", { year: "numeric", month: "short" });
+      }
+    },
+    updateTotalMoneyAvailable(totalMoney) {
+      // Emitir el evento al componente padre (BudgetMenu)
+      this.$emit("update-total-money-available", totalMoney);
     }
   }
-}
+};
 </script>
 
 <style scoped>
@@ -200,6 +216,10 @@ export default {
 .budget-header__item {
   margin-right: 20px;
 }
+
+ul{
+   list-style-type: none;
+} 
 
 .budget__add-group {
   position: relative;
@@ -232,7 +252,6 @@ export default {
 }
 
 .budget__body-category-group {
-
 }
 
 .budget__body-category-group ul {
@@ -242,5 +261,4 @@ export default {
 .target {
   max-width: 40rem;
 }
-
 </style>

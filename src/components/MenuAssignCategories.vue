@@ -2,9 +2,7 @@
   <base-card
     class="categories-group"
   >
-    <p class="categories-group__tittle">
-      Categorias Presupuesto
-    </p>
+    <slot></slot>
     <ul>
       <li
         class="account-type"
@@ -35,13 +33,17 @@ export default {
     components: {
         BaseCard
     },
-    props: ["accountGroup"],
     emits:['selected-category'],
     data() {
       return {
         
       }
     },
+    computed: {
+      accountGroup() {
+        return this.$store.getters["budget/accountGroup"];
+      }
+    }, 
     methods:{
       setCategoryAccount(account,category,moneyAssigned, available){
         this.$emit('selected-category', {

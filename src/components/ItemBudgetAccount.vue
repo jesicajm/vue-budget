@@ -31,7 +31,7 @@
 <script>
 export default {
   props: ["accountName", "accountBalance", "accountType"],
-  emits: ["select-account", 'show-edit-account','select-account'],
+  emits: ["account-selected", 'show-edit-account'],
   data() {
     return {
       creditAccounts: [
@@ -62,10 +62,11 @@ export default {
     showEditAccount(){
       this.$emit('show-edit-account', {
         accountName: this.accountName, 
-        accountBalance: this.accountBalance});
+        accountBalance: this.accountBalance,
+        accountType: this.accountType});
     },
     selectAccount(){
-      this.$emit('select-account');
+      this.$emit('account-selected', this.accountName);
     }
   }
 };
