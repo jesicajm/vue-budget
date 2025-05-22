@@ -52,16 +52,20 @@
   </div>  -->
   <li>
     <grid-budget
+      type-account="group"
       :groupName="groupName"
       @toggle-show-categories="handletoggleCategories"
     >
     </grid-budget>
-    <ul v-if="isCategories">
+    <ul class="categorias" v-if="isCategories">
       <!-- Listar categorías que pertenecen al grupo actual -->
       <li>
         <grid-budget v-for="category in categoriesByGroup(groupName)" 
            :groupName="category.name"
-           :asignado-money="category.assigned"
+           type-account="category" 
+           :assigned-money="category.assigned"
+           :activity-money="category.activity"
+           :available-money="category.available"
            :key="category.name">
         </grid-budget> 
       </li>   
@@ -80,7 +84,7 @@ export default {
   props: ["groupName"],
   data() {
     return {
-      isCategories: false,
+      isCategories: false
     };
   },
   computed: {
@@ -101,6 +105,7 @@ export default {
 ul{
   padding:0;
 }
+
 
 li{
   list-style: none;

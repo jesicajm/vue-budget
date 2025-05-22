@@ -1,36 +1,44 @@
 <template>
   <div class="grid-container">
     <div class="grid-item large">
-      <svg
-      v-if="!isCategories"
-      @click="handletoggleCategories"
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      fill="currentColor"
-      class="bi bi-caret-right-fill"
-      viewBox="0 0 16 16"
-    >
-      <path
-        d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"
-      />
-    </svg>
-    <svg
-      v-else
-      @click="handletoggleCategories"
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      fill="currentColor"
-      class="bi bi-caret-down-fill"
-      viewBox="0 0 16 16"
-    >
-    <path
-        d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"
-      />
-    </svg>
-    <div class="name-account">
-        <span @click="toggleUpdateNameAccount" ref="nameAccount">{{ groupName }}</span>
+      <div v-if="typeAccount === 'group'">
+        <svg
+          v-if="!isCategories"
+          @click="handletoggleCategories"
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="currentColor"
+          class="bi bi-caret-right-fill"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"
+          />
+        </svg>
+        <svg
+          v-else
+          @click="handletoggleCategories"
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="currentColor"
+          class="bi bi-caret-down-fill"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"
+          />
+        </svg>
+      </div>
+
+      <label :class="typeAccount !== 'group' ? 'category' : 'group'">
+        <input type="checkbox" name="select" value="true" />
+      </label>
+      <div class="name-account">
+        <span @click="toggleUpdateNameAccount" ref="nameAccount">{{
+          groupName
+        }}</span>
         <update-category
           class="card-update-account"
           v-if="isUpdateName"
@@ -39,27 +47,27 @@
           @delete-category="deleteAccount"
           @update-data="updateData"
           :name-category="groupName"
-        ></update-category>  
+        ></update-category>
+      </div>
     </div>
-    </div>
-    <div class="grid-item small">{{ asignadoMoney }}</div>
-    <div class="grid-item small">Tercer elemento</div>
-    <div class="grid-item small">Cuarto elemento</div>
+    <div class="grid-item small">{{ assignedMoney }}</div>
+    <div class="grid-item small">{{ activityMoney }}</div>
+    <div class="grid-item small">{{ availableMoney }}</div>
   </div>
 </template>
 
 <script>
-import UpdateCategory from '../UpdateCategory.vue'
+import UpdateCategory from "../UpdateCategory.vue";
 
 export default {
-  props: ['groupName','asignadoMoney'],
+  props: ["groupName", "assignedMoney", "activityMoney","availableMoney","typeAccount"],
   components: {
-    UpdateCategory
-  },  
+    UpdateCategory,
+  },
   data() {
     return {
       isUpdateName: false,
-      isCategories: false
+      isCategories: false,
     };
   },
   mounted() {
@@ -67,15 +75,15 @@ export default {
     this.widthNameAccount = `width: ${this.$refs.nameAccount.offsetWidth}px;`;
     this.position = `left: -${left}px;`;
   },
-   methods: {
+  methods: {
     handletoggleCategories() {
       this.isCategories = !this.isCategories;
-      this.$emit('toggle-show-categories', this.isCategories); // Alternar el estado del caret
+      this.$emit("toggle-show-categories", this.isCategories); // Alternar el estado del caret
     },
     toggleUpdateNameAccount() {
       this.isUpdateName = !this.isUpdateName;
     },
-   } 
+  },
 };
 </script>
 
@@ -102,6 +110,14 @@ export default {
 .small {
   text-align: end;
   flex: 1; /* Tamaño proporcional dentro de la fila */
+}
+
+.category{
+  margin-left: 15.99px;
+}
+
+.group{
+  margin-left: 0;
 }
 
 .name-account {
